@@ -1,6 +1,7 @@
-#include "cmd.h"
 #include <stdio.h>
 #include <string.h>
+#include "cmd.h"
+#include "utility.h"
 CmdList* makeCmdList(Cmd* firstCmd)
 {
     return (CmdList*)makeList((void*)firstCmd);
@@ -18,38 +19,15 @@ Cmd* getCmd(CmdList* list)
 {
     return (Cmd*)list->Value;
 }
-void printPadding(int level, int lastChild)
-{
-    if(level == 0)
-        return;
-    char buffer[level*4 + 1] ;
-    memset(buffer, 0, sizeof(buffer));
-    char buffer1[6] = "|   ";
-    char buffer2[6] = "|-- ";
-    char buffer3[6] = "|__ ";
-    char* finalBuffer = (lastChild == 1 ? buffer3 : buffer2);
-    int i;
-    for(i = 0; i < (level-1) * 4; ++i)
-    {
-        buffer[i] = buffer1[i%4];
-    }
 
-    memcpy(&buffer[i], finalBuffer, 4);
-    printf("%s\n", buffer);
-}
 
-void printStringName(char* prefix, char* suffix, int level, int lastChild)
-{
-    printPadding(level, lastChild);
-    printf("%s, %s\n", prefix, suffix);
-}
 
 void printDeclaration(Cmd* cmd, int level, int lastChild)  
 {
     printPadding(level, lastChild);
     printf("C_DECLARATION\n");
-    printStringName("OPERATOR", ":=", level + 1, 0);
-    printStringName("VARNAME", cmd->attr.declaration.variableName, level + 1, 0);
+    printKeyValue("OPERATOR", ":=", level + 1, 0);
+    printKeyValue("VARNAME", cmd->attr.declaration.variableName, level + 1, 0);
     //printPadding(level + 1, 1);
     //TODO PRINT DECLARATION
 }
@@ -58,7 +36,8 @@ void printIncrement(Cmd* cmd, int level, int lastChild)
 {
     printPadding(level, lastChild);
     printf("C_INCREMENT\n");
-    printStringName("OPERATOR", cmd->attr.increment.operator, 
+    printKeyValue("VARNAME", cmd->attr.increment.variableName, level + 1, 0);
+    printKeyValue("OPERATOR", cmd->attr.increment.operator, 
         level + 1, cmd->attr.increment.expression == NULL);
     if( cmd->attr.increment.expression != NULL)
     {
@@ -97,7 +76,7 @@ printFuncCall(Cmd* cmd, int level, int lastChild)
 {
     printPadding(level, lastChild);
     printf("C_FUNC_CALL\n");
-    printStringName("OPERATOR", ":=", level + 1, 0);
+    printKeyValue("OPERATOR", ":=", level + 1, 0);
     
 }
 

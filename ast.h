@@ -7,15 +7,17 @@
 struct _Expr {
 	enum { 
 		E_INTEGER,
-		E_OPERATION
+		E_OPERATION,
+		E_VARIABLE
 	} kind;
 	union {
 		int value; // for integer values
 		struct { 
-			int operator; // PLUS, MINUS, etc 
+			char* operator; // PLUS, MINUS, etc 
 			struct _Expr* left;
 			struct _Expr* right;
 		} op; // for binary expressions
+		char* variableName;
 	} attr;
 };
 
@@ -23,7 +25,7 @@ typedef struct _Expr Expr; // Convenience typedef
 
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
-Expr* ast_operation(int operator, Expr* left, Expr* right);
-Expr* ast_assign(char variable, Expr* right);
+Expr* ast_variable(char* variable);
+Expr* ast_operation(char* operator, Expr* left, Expr* right);
 
 #endif
