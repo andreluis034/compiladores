@@ -28,12 +28,12 @@ struct _Cmd {
         struct {
             struct _Cmd* initial;
             struct _Expr* condition;
-            struct _Cmd* afterLoop;
+            struct _Cmd* afterIteration;
             CmdList* body;
         } forCmd;
         struct {
 			char* funcName;
-			CmdList* variables;
+			List* variables;
 		} funcCall;
 	} attr;
 };
@@ -43,5 +43,5 @@ CmdList* makeCmdList(Cmd* firstCmd);
 CmdList* appendCmd(CmdList* list, Cmd* value);
 CmdList* prependCmd(CmdList* list, Cmd* value);
 Cmd* getCmd(CmdList* list);
-void printCmdList(CmdList* cmdlist, int level);
+void printCmdList(CmdList* cmdlist, int level, int lastChild);
 void printCmdTree(Cmd* cmd, int level, int lastChild);

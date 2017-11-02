@@ -37,41 +37,85 @@ void printPadding(int level, int lastChild)
     memcpy(&buffer[i], finalBuffer, 4);
     printf("%s\n", buffer);
 }
+
+void printStringName(char* prefix, char* suffix, int level, int lastChild)
+{
+    printPadding(level, lastChild);
+    printf("%s, %s\n", prefix, suffix);
+}
+
+void printDeclaration(Cmd* cmd, int level, int lastChild)  
+{
+    printPadding(level, lastChild);
+    printf("C_DECLARATION\n");
+    printStringName("OPERATOR", ":=", level + 1, 0);
+    printStringName("VARNAME", cmd->attr.declaration.variableName, level + 1, 0);
+    //printPadding(level + 1, 1);
+    //TODO PRINT DECLARATION
+}
+
+void printIncrement(Cmd* cmd, int level, int lastChild)  
+{
+    printPadding(level, lastChild);
+    printf("C_INCREMENT\n");
+    printStringName("OPERATOR", cmd->attr.increment.operator, 
+        level + 1, cmd->attr.increment.expression == NULL);
+    if( cmd->attr.increment.expression != NULL)
+    {
+        //TODO print EXPR
+    }
+}
+void printIfElse(Cmd* cmd, int level, int lastChild)  
+{
+    printPadding(level, lastChild);
+    printf("C_IF_ELSE\n");
+    //TODO print EXPR
+    lastChild = IS_EMPTY_LIST( cmd->attr.ifelse.iffalse );
+    printCmdList(cmd->attr.ifelse.iftrue, level + 1, lastChild);
+    if(!lastChild)
+    {
+        printCmdList(cmd->attr.ifelse.iffalse, level + 1, lastChild);
+    }
+}
+
+printFor(Cmd* cmd, int level, int lastChild) 
+{
+    printPadding(level, lastChild);
+    printf("C_FOR\n");
+    if(cmd->attr.forCmd.initial != NULL)
+    {
+        printCmd(cmd->attr.forCmd.initial, level + 1, 0);
+    }
+    //TODO print EXPR
+    //printCmd(cmd->attr.forCmd.condition, level + 1, cmd->attr.forCmd.afterIteration != NULL);
+    if(cmd->attr.forCmd.afterIteration != NULL)
+    {
+        printCmd(cmd->attr.forCmd.afterIteration, level + 1, 1);
+    }
+}
+printFuncCall(Cmd* cmd, int level, int lastChild) 
+{
+    printPadding(level, lastChild);
+    printf("C_FUNC_CALL\n");
+    printStringName("OPERATOR", ":=", level + 1, 0);
+    
+}
+
 void printCmd(Cmd* cmd, int level, int lastChild)  
 {
     switch(cmd->kind)
     {
         case C_DECLARATION:
-            printf("C_DECLARATION, :=\n");
-            printPadding(level + 1, 0);
-            printf("NAME, %s\n", cmd->attr.declaration.variableName);
-            printPadding(level + 1, 1);
-            //TODO: print expr
+            printDeclaration(cmd, level, lastChild);
             break;  
         case C_INCREMENT:
-            printf("C_INCREMENT\n");
-            printPadding(level + 1, 0);
-            //PRINT EXPR
-            int isNull = cmd->attr.increment.expression == NULL;
-            if(isNull)
-            {
-                printPadding(level + 1, 1);
-                //TODO: print expr
-            }
+            printIncrement(cmd, level, lastChild);
             break;
         case C_IF_ELSE:
-            printf("C_IF_ELSE, %s\n", cmd->attr.increment.operator);
-            int isEmpty = IS_EMPTY_LIST(cmd->attr.ifelse.iffalse) ;
-            printPadding(level + 1, isEmpty);
-            printCmdList(cmd->attr.ifelse.iftrue, level + 1);
-            if(isEmpty)
-            {
-                printPadding(level + 1, 1);
-                printCmdList(cmd->attr.ifelse.iffalse, level + 1);
-            
-            }
+            printIfElse(cmd, level, lastChild);
             break;
         case C_FOR:
+            printFor(cmd, level, lastChild);
             break;
         case C_FUNC_CALL:
             break;
@@ -81,8 +125,9 @@ void printCmd(Cmd* cmd, int level, int lastChild)
     }
 }
 
-void printCmdList(CmdList* cmdlist, int level)
+void printCmdList(CmdList* cmdlist, int level, int lastChild)
 {
+    printPadding(level, lastChild);
     printf("CmdList\n");
     while(cmdlist != NULL)
     {
