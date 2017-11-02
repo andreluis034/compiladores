@@ -32,8 +32,9 @@ struct _Cmd {
             CmdList* body;
         } forCmd;
         struct {
-            char* funcName;
-        } funcCall;
+			char* funcName;
+			CmdList* variables;
+		} funcCall;
 	} attr;
 };
 typedef struct _Cmd Cmd;
@@ -42,3 +43,5 @@ CmdList* makeCmdList(Cmd* firstCmd);
 CmdList* appendCmd(CmdList* list, Cmd* value);
 CmdList* prependCmd(CmdList* list, Cmd* value);
 Cmd* getCmd(CmdList* list);
+void printCmdList(CmdList* cmdlist, int level);
+void printCmdTree(Cmd* cmd, int level, int lastChild);
