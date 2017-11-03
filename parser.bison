@@ -114,6 +114,7 @@ n_arg_list: expr
 	        | expr COMMA_TOKEN n_arg_list
 
 if: IF_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
+declaration: VAR_TOKEN ASSIGN_TOKEN expr
 
 if_else: {$$ = NULL;}
         | ELSE_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = $3;}
