@@ -54,7 +54,6 @@
 %type <stringValue> bool_op;
 %type <cmdList> cmd_list;
 %type <cmdList> if_else;
-%type <exprList> var_list;
 %type <command> cmd;
 %type <command> declaration
 %type <command> increment
