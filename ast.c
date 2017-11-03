@@ -25,6 +25,7 @@ Expr* getExpr(ExprList* list)
 
 Expr* ast_variable(char* varName)
 {
+	printf("var: %s\n", varName);
  	Expr* node = (Expr*) malloc(sizeof(Expr));
 	node->kind = E_VARIABLE;
 	node->attr.variable = varName;//makeVariable(varName, NULL);
@@ -111,6 +112,7 @@ void printExprList(ExprList* Exprlist, int level, int lastChild)
     printf("ExprList\n");
     while(Exprlist != NULL)
     {
-        printExpr(getExpr(Exprlist), level + 1, IS_EMPTY_LIST(Exprlist->Next));
+		printExpr(getExpr(Exprlist), level + 1, IS_EMPTY_LIST(Exprlist->Next));
+		Exprlist = Exprlist->Next;
     }
 }

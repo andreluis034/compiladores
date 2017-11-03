@@ -165,5 +165,6 @@ void printCmdList(CmdList* cmdlist, int level, int lastChild)
     while(cmdlist != NULL)
     {
         printCmd(getCmd(cmdlist), level + 1, IS_EMPTY_LIST(cmdlist->Next));
+        cmdlist = cmdlist->Next;
     }
 }

@@ -18,7 +18,7 @@ void printPadding(int level, int lastChild)
     }
 
     memcpy(&buffer[i], finalBuffer, 4);
-    printf("%s\n", buffer);
+    printf("%s", buffer);
 }
 
 

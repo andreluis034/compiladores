@@ -1,10 +1,11 @@
 #include "list.h"
 #include <stdlib.h>
+#include <stdio.h>
 List* makeList(void* Value) 
 {
     List* list = (List*)malloc(sizeof(List));
     list->Value = Value;
-    list->Next = NULL;
+    list->Next = EMPTY_LIST;
     return list;
 }
 
@@ -15,9 +16,9 @@ List* appendToList(List* list, void* value)
         return makeList(value);
     }
     List* list2;
-    for(list2 = list; list2 != NULL; list2 = list2->Next)
+    for(list2 = list; list2 != EMPTY_LIST; list2 = list2->Next)
     {
-        if(list2->Next == NULL)
+        if(list2->Next == EMPTY_LIST)
         {
             list2->Next = makeList(value);
             break;
@@ -28,11 +29,11 @@ List* appendToList(List* list, void* value)
 
 List* prependToList(List* list, void* value) 
 {
+    List* list2 = makeList(value);
     if(IS_EMPTY_LIST(list))
     {
-        return makeList(value);
+        return list2;
     }
-    List* list2 = makeList(value);
     list2->Next = list;
     return list2;
 }

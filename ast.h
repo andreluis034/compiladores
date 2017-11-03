@@ -30,6 +30,7 @@ typedef struct _Expr Expr; // Convenience typedef
 ExprList* makeExprList(Expr* firstExpr);
 ExprList* appendExpr(ExprList* list, Expr* value);
 ExprList* prependExpr(ExprList* list, Expr* value);
+Expr* getExpr(ExprList* list);
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
 Expr* ast_variable(char* variable);
