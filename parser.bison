@@ -11,11 +11,12 @@
 %token SEPARATOR_TOKEN
 %token <expression> INT_TOKEN
 %token <expression> BOOL_TOKEN
-%token BINARY_TOKEN
+%token <stringValue> BINARY_TOKEN
+%token <stringValue> BINARY_REL_TOKEN
+%token <stringValue> REL_TOKEN
 %token <stringValue> INCREMENT_TOKEN 
 
 %left <command> ASSIGN_TOKEN
-%left <stringValue> REL_TOKEN
 %left <stringValue> ADD_TOKEN
 %left <stringValue> MUL_TOKEN
 %left OPENPAR_TOKEN
@@ -39,11 +40,13 @@
 %type <stringValue> VAR_TOKEN
 */
 %type <expression> expr;
-%type <expression> bool_value;
-%type <expression> arit_value;
 %type <expression> expr_bool;
+%type <expression> expr_bool_final;
 %type <expression> expr_arit;
+%type <expression> expr_arit_final;
 %type <stringValue> arit_op;
+%type <stringValue> arit_comp;
+%type <stringValue> bool_op;
 %type <cmdList> cmd_list;
 %type <cmdList> if_else;
 %type <exprList> var_list;
@@ -112,22 +115,26 @@ increment: VAR_TOKEN INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
 expr: expr_arit {$$ = $1;}
     | expr_bool {$$ = $1;}
 
-expr_arit: expr_arit arit_op arit_value {$$ = ast_operation($2, $1, $3);}
-	 | arit_value {$$ = $1;}
+expr_arit: expr_arit arit_op expr_arit_final {$$ = ast_operation($2, $1, $3);}
+    | expr_arit_final 
 
-arit_value: VAR_TOKEN  { $$ = ast_variable(yylval.stringValue);}
-     	  | INT_TOKEN {$$ = ast_integer(yylval.intValue);}
+expr_arit_final: VAR_TOKEN  { $$ = ast_variable(yylval.stringValue);}
+    | INT_TOKEN { $$ = ast_integer(yylval.intValue);}
 
+expr_bool: expr_bool bool_op expr_bool_final {$$ = ast_operation($2, $1, $3);}
+    | expr_arit arit_comp expr_arit {$$ = ast_operation($2, $1, $3);}
+    | expr_bool_final
 
-expr_bool: expr_bool REL_TOKEN bool_value {$$ = ast_operation($2, $1, $3);}
-	 | expr_arit REL_TOKEN arit_value {$$ = ast_operation($2, $1, $3);}
-	 | bool_value {$$ = $1;}
+expr_bool_final: BOOL_TOKEN { $$ = ast_bool(yylval.boolValue);}
 
-bool_value: VAR_TOKEN { $$ = ast_variable(yylval.stringValue);}
-	  | BOOL_TOKEN {$$ = ast_bool(yylval.boolValue);}
+bool_op: REL_TOKEN
+    |   BINARY_REL_TOKEN
+
+arit_comp: BINARY_REL_TOKEN
+    |   REL_TOKEN
 
 arit_op: ADD_TOKEN
-       | MUL_TOKEN
+       | MUL_TOKEN 
 
 %%
 
