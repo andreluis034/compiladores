@@ -112,15 +112,15 @@ increment: VAR_TOKEN INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
 expr: expr_arit {$$ = $1;}
     | expr_bool {$$ = $1;}
 
-expr_arit: expr_arit arit_op expr_arit {$$ = ast_operation($2, $1, $3);}
+expr_arit: expr_arit arit_op arit_value {$$ = ast_operation($2, $1, $3);}
 	 | arit_value {$$ = $1;}
 
 arit_value: VAR_TOKEN  { $$ = ast_variable(yylval.stringValue);}
-     	  | INT_TOKEN {$$ = ast_bool(yylval.boolValue);}
+     	  | INT_TOKEN {$$ = ast_integer(yylval.intValue);}
 
 
-expr_bool: expr_bool REL_TOKEN expr_bool {$$ = ast_operation($2, $1, $3);}
-	 | expr_arit REL_TOKEN expr_arit {$$ = ast_operation($2, $1, $3);}
+expr_bool: expr_bool REL_TOKEN bool_value {$$ = ast_operation($2, $1, $3);}
+	 | expr_arit REL_TOKEN arit_value {$$ = ast_operation($2, $1, $3);}
 	 | bool_value {$$ = $1;}
 
 bool_value: VAR_TOKEN { $$ = ast_variable(yylval.stringValue);}
