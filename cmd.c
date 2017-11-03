@@ -4,7 +4,9 @@
 
 #include "cmd.h"
 #include "utility.h"
-
+#define sCase(caso, func) case caso: \
+func(cmd, level, lastChild);\
+break
 CmdList* makeCmdList(Cmd* firstCmd)
 {
     return (CmdList*)makeList((void*)firstCmd);
@@ -68,6 +70,15 @@ Cmd* makeFuncCall(char* funcName, ExprList* variables)
     node->attr.funcCall.variables = variables;
     return node;
 }
+Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) 
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_FUNC;
+    node->attr.func.funcName = funcName;
+    node->attr.func.argList = arglist;
+    node->attr.func.commandList = cmdlist;
+    return node;
+}
 
 void printDeclaration(Cmd* cmd, int level, int lastChild)  
 {   
@@ -107,44 +118,43 @@ void printFor(Cmd* cmd, int level, int lastChild)
     {
         printCmd(cmd->attr.forCmd.initial, level + 1, 0);
     }
-    //TODO print EXPR
     printExpr(cmd->attr.forCmd.condition, level + 1, 0);
-    //printCmd(cmd->attr.forCmd.condition, level + 1, cmd->attr.forCmd.afterIteration != NULL);
     if(cmd->attr.forCmd.afterIteration != NULL)
     {
         printCmd(cmd->attr.forCmd.afterIteration, level + 1, 0);
     }
     printCmdList(cmd->attr.forCmd.body, level + 1, 1);
 }
-void printFuncCall(Cmd* cmd, int level, int lastChild) //TODO
+void printFuncCall(Cmd* cmd, int level, int lastChild) 
 {
     printPadding(level, lastChild);
     printf("C_FUNC_CALL\n");
-    printKeyValue("OPERATOR", ":=", level + 1, 0);
-    
+    printKeyValue("NAME", cmd->attr.funcCall.funcName, level + 1, IS_EMPTY_LIST(cmd->attr.funcCall.variables));
+    if(!IS_EMPTY_LIST(cmd->attr.funcCall.variables))
+    {
+        printExprList(cmd->attr.funcCall.variables);
+    }
+}
+
+void printFunc(Cmd* cmd, int level, int lastChild)
+{
+    printPadding(level, lastChild);
+    printf("C_FUNC\n");
+    printKeyValue("NAME", cmd->attr.func.funcName, level + 1, 0);
+    printExprList(cmd->attr.func.argList, level + 1, 0);
+    printCmdList(cmd->attr.func.commandList, level + 1, 0);
 }
 
 void printCmd(Cmd* cmd, int level, int lastChild)  
 {
     switch(cmd->kind)
     {
-        case C_DECLARATION:
-            printDeclaration(cmd, level, lastChild);
-            break;  
-        case C_INCREMENT:
-            printIncrement(cmd, level, lastChild);
-            break;
-        case C_IF_ELSE:
-            printIfElse(cmd, level, lastChild);
-            break;
-        case C_FOR:
-            printFor(cmd, level, lastChild);
-            break;
-        case C_FUNC_CALL:
-            break;
-        default:
-            printf("wtf is going on");
-            break;
+        sCase(C_DECLARATION, printDeclaration);
+        sCase(C_INCREMENT, printIncrement);
+        sCase(C_IF_ELSE, printIfElse);
+        sCase(C_FOR, printFor);
+        sCase(C_FUNC_CALL, printFuncCall);
+        sCase(C_FUNC, printFunc);
     }
 }
 

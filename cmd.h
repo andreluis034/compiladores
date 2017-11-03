@@ -8,7 +8,8 @@ struct _Cmd {
 		C_INCREMENT,
 		C_IF_ELSE,
 		C_FOR,
-		C_FUNC_CALL
+		C_FUNC_CALL,
+		C_FUNC
 	} kind;
 	union {
 		Expr* declaration;
@@ -32,6 +33,11 @@ struct _Cmd {
 			char* funcName;
 			ExprList* variables;
 		} funcCall;
+		struct {
+			char* funcName;
+			ExprList* argList;
+			CmdList* commandList;
+		} func;
 	} attr;
 };
 typedef struct _Cmd Cmd;
@@ -47,3 +53,4 @@ Cmd* makeIncrementCmd(Expr* variable, char* operator, Expr* expr );
 Cmd* makeIfElseCmd(Expr* expr, CmdList* iftrue, CmdList* iffalse );
 Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body );
 Cmd* makeFuncCall(char* funcName, ExprList* variables) ;
+Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) ;

@@ -54,6 +54,8 @@
 %type <stringValue> bool_op;
 %type <cmdList> cmd_list;
 %type <cmdList> if_else;
+%type <exprList> arg_list;
+%type <exprList> n_arg_list;
 %type <command> cmd;
 %type <command> declaration
 %type <command> increment
@@ -62,6 +64,7 @@
 %type <command> for_three_arg
 %type <command> print
 %type <command> scan
+%type <command> func_call
 /*
 %type <Expr*> VAR_TOKEN
 %type <Expr*> BOOL_TOKEN
@@ -90,13 +93,15 @@ packages:
 
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
-
-cmd_list: {$$ = EMPTY_LIST;};
-	 | cmd cmd_list {$$ = appendCmd($2, $1);}
+    
 func: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN
 func_list:
 	 | func func_list
-func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN
+
+cmd_list: {$$ = EMPTY_LIST;};
+	 | cmd cmd_list {$$ = appendCmd($2, $1);}
+
+
 
 cmd: declaration SEPARATOR_TOKEN
    | increment SEPARATOR_TOKEN
@@ -107,14 +112,15 @@ cmd: declaration SEPARATOR_TOKEN
    | scan SEPARATOR_TOKEN
    | func_call SEPARATOR_TOKEN
 
-arg_list: 
+arg_list: {$$ = EMPTY_LIST;}
 	      | n_arg_list
 
-n_arg_list: expr
-	        | expr COMMA_TOKEN n_arg_list
+n_arg_list: expr {$$ = makeExprList($1);}
+	        | expr COMMA_TOKEN n_arg_list {$$ = prependExpr($3, $1);}
+
+declaration: VAR_TOKEN ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, $3);}
 
 if: IF_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
-declaration: VAR_TOKEN ASSIGN_TOKEN expr
 
 if_else: {$$ = NULL;}
         | ELSE_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = $3;}
@@ -123,9 +129,11 @@ for_one_arg: FOR_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = mak
 
 for_three_arg: FOR_TOKEN declaration SEPARATOR_TOKEN expr_bool SEPARATOR_TOKEN increment OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFor($2,$4,$6,$8);}
 
-print: PRINT_FUNCTION_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN  { $$ = makeFuncCall("fmt.print", $3);}
+print: PRINT_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN  { $$ = makeFuncCall("fmt.print", $3);}
 
-scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN { $$ = makeFuncCall("fmt.scan", $3);}
+scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall("fmt.scan", $3);}
+
+func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall(yylval.stringValue, $3);}
 
 increment: VAR_TOKEN INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
          | VAR_TOKEN INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}
