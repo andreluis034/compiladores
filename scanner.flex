@@ -23,7 +23,7 @@
 	return BINARY_REL_TOKEN;
 }
 
-<|<=|>|>= { 
+\<\=|\>\=|\<|\> { 
 	yylval.stringValue = strdup(yytext);
     printf("REL_TOKEN\n");
 	return REL_TOKEN;

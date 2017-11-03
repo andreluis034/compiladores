@@ -139,6 +139,6 @@ arit_op: ADD_TOKEN
 %%
 
 void yyerror(const char* err) {
-  printf("error: %s", err );
+  printf("error: %s\n", err );
 }
 
