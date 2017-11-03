@@ -1,7 +1,7 @@
 %start prog;
 
 
-%token VAR_TOKEN
+%token <expression> VAR_TOKEN
 %token FUNC_TOKEN
 %token PRINT_FUNCTION_TOKEN
 %token SCAN_FUNCTION_TOKEN
@@ -9,15 +9,15 @@
 %token FOR_TOKEN
 %token ELSE_TOKEN
 %token SEPARATOR_TOKEN
-%token INT_TOKEN
-%token BOOL_TOKEN
+%token <expression> INT_TOKEN
+%token <expression> BOOL_TOKEN
 %token BINARY_TOKEN
 %token INCREMENT_TOKEN 
 
 %left ASSIGN_TOKEN
-%left REL_TOKEN
-%left ADD_TOKEN
-%left MUL_TOKEN
+%left <stringValue> REL_TOKEN
+%left <stringValue> ADD_TOKEN
+%left <stringValue> MUL_TOKEN
 %left OPENPAR_TOKEN
 %left CLOSEPAR_TOKEN
 %left OPENBRA_TOKEN
@@ -28,16 +28,29 @@
     char* stringValue;
     int intValue;
     int boolValue;
+    Expr* expression;
 }
-
+/*
 %type <intValue> INT_TOKEN
 %type <boolValue> BOOL_TOKEN
 %type <stringValue> VAR_TOKEN
-
+*/
+%type <expression> expr;
+%type <expression> bool_value;
+%type <expression> arit_value;
+%type <expression> expr_bool;
+%type <expression> expr_arit;
+%type <stringValue> arit_op;
+/*
+%type <Expr*> VAR_TOKEN
+%type <Expr*> BOOL_TOKEN
+%type <Expr*> INT_TOKEN
+%type <Expr*> bool_value*/
 
 %code requires {
 #include <stdio.h>
 #include <stdlib.h>
+#include "ast.h"
 
 extern int yylex();
 extern char* yytext;
@@ -81,22 +94,22 @@ scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN
 increment: VAR_TOKEN INCREMENT_TOKEN
          | VAR_TOKEN INCREMENT_TOKEN expr
 
-expr: expr_arit
-    | expr_bool 
+expr: expr_arit {$$ = $1;}
+    | expr_bool {$$ = $1;}
 
-expr_arit: expr_arit arit_op expr_arit
-	 | arit_value
+expr_arit: expr_arit arit_op expr_arit {$$ = ast_operation($2, $1, $3);}
+	 | arit_value {$$ = $1;}
 
-arit_value: VAR_TOKEN
-     	  | INT_TOKEN
+arit_value: VAR_TOKEN  { $$ = ast_variable(yylval.stringValue);}
+     	  | INT_TOKEN {$$ = ast_bool(yylval.boolValue);}
 
 
-expr_bool: expr_bool REL_TOKEN expr_bool
-	 | expr_arit REL_TOKEN expr_arit
-	 | bool_value
+expr_bool: expr_bool REL_TOKEN expr_bool {$$ = ast_operation($2, $1, $3);}
+	 | expr_arit REL_TOKEN expr_arit {$$ = ast_operation($2, $1, $3);}
+	 | bool_value {$$ = $1;}
 
-bool_value: VAR_TOKEN
-	  | BOOL_TOKEN
+bool_value: VAR_TOKEN { $$ = ast_variable(yylval.stringValue);}
+	  | BOOL_TOKEN {$$ = ast_bool(yylval.boolValue);}
 
 arit_op: ADD_TOKEN
        | MUL_TOKEN
