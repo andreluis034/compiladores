@@ -52,10 +52,12 @@
 %type <stringValue> arit_op;
 %type <stringValue> arit_comp;
 %type <stringValue> bool_op;
+%type <cmdList> func_list;
 %type <cmdList> cmd_list;
 %type <cmdList> if_else;
 %type <exprList> arg_list;
 %type <exprList> n_arg_list;
+%type <command> func;
 %type <command> cmd;
 %type <command> declaration
 %type <command> increment
@@ -81,6 +83,7 @@ extern int yylex();
 extern char* yytext;
 extern FILE* yyin;
 extern void yyerror(const char* msg);
+CmdList* root;
 }
 
 %%
@@ -93,13 +96,13 @@ packages:
 
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
-    
-func: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN
-func_list:
-	 | func func_list
+
+func: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
+func_list: {$$ = EMPTY_LIST;}
+	 | func func_list {$$ = root = prependCmd($2, $1);}
 
 cmd_list: {$$ = EMPTY_LIST;};
-	 | cmd cmd_list {$$ = appendCmd($2, $1);}
+	 | cmd cmd_list {$$ = prependCmd($2, $1);}
 
 
 
@@ -133,7 +136,7 @@ print: PRINT_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN  { $$ = makeFu
 
 scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall("fmt.scan", $3);}
 
-func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall(yylval.stringValue, $3);}
+func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
 
 increment: VAR_TOKEN INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
          | VAR_TOKEN INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}

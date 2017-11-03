@@ -10,8 +10,11 @@ int main(int argc, char** argv) {
         return 1;
       }
     } //  yyin = stdin
+    root == NULL;
+    printf("%p\n", root);
     if (yyparse() == 0) {
-       // printf("Result = %d\n", eval(root));
+      printf("%p\n", root);
+      // printf("Result = %d\n", eval(root));
     }
     return 0;
   }
