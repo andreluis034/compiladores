@@ -8,8 +8,19 @@
 %option noyywrap
 %%
 
+\/\/.*\n {
+            //one line comment
+         }
 
-:=  {printf("ASSIGN_TOKEN\n");return ASSIGN_TOKEN;}
+:=|=  {printf("ASSIGN_TOKEN\n");return ASSIGN_TOKEN;}
+
+"package" {printf("PACKAGE_TOKEN\n");return PACKAGE_TOKEN;}
+
+"import" {printf("IMPORT_TOKEN\n");return IMPORT_TOKEN;}
+
+\" {printf("QUOTES_TOKEN\n");return QUOTES_TOKEN;}
+
+"," {printf("COMMA_TOKEN\n");return COMMA_TOKEN;}
 
 \|\||&& {
 	yylval.stringValue = strdup(yytext);
@@ -17,13 +28,7 @@
 	return BINARY_TOKEN;
 }
 
-==|!= {
-    yylval.stringValue = strdup(yytext);
-    printf("BINARY_REL_TOKEN\n");
-	return BINARY_REL_TOKEN;
-}
-
-\<\=|\>\=|\<|\> { 
+==|!=|<|<=|>|>= { 
 	yylval.stringValue = strdup(yytext);
     printf("REL_TOKEN\n");
 	return REL_TOKEN;
@@ -79,7 +84,7 @@ true|false {
 
 ";" { printf("SEPARATOR_TOKEN\n");return SEPARATOR_TOKEN; }
 
--?[0-9]+ {
+[0-9]+ {
     yylval.intValue = atoi(yytext);
     printf("INT_TOKEN\n");
     return INT_TOKEN;
@@ -91,6 +96,6 @@ true|false {
     return VAR_TOKEN;
 }
 
-[ \t\n\r] {printf("SPACE\n");}
+[ \t\n\r] {}
 
 %%

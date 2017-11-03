@@ -19,6 +19,11 @@
 %left <command> ASSIGN_TOKEN
 %left <stringValue> ADD_TOKEN
 %left <stringValue> MUL_TOKEN
+%token PACKAGE_TOKEN
+%token IMPORT_TOKEN
+%token QUOTES_TOKEN 
+%token COMMA_TOKEN
+%precedence BEFORE_EXP
 %left OPENPAR_TOKEN
 %left CLOSEPAR_TOKEN
 %left OPENBRA_TOKEN
@@ -78,10 +83,21 @@ extern void yyerror(const char* msg);
 
 %%
 
-prog: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN
+prog: packages imports func_list
+
+
+packages:
+	| PACKAGE_TOKEN VAR_TOKEN packages
+
+imports:
+	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
 
 cmd_list: {$$ = EMPTY_LIST;};
 	 | cmd cmd_list {$$ = appendCmd($2, $1);}
+func: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN
+func_list:
+	 | func func_list
+func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN
 
 cmd: declaration SEPARATOR_TOKEN
    | increment SEPARATOR_TOKEN
@@ -90,11 +106,13 @@ cmd: declaration SEPARATOR_TOKEN
    | for_three_arg
    | print SEPARATOR_TOKEN
    | scan SEPARATOR_TOKEN
+   | func_call SEPARATOR_TOKEN
 
-var_list: {$$ = EMPTY_LIST;}
-        | VAR_TOKEN var_list {$$ = appendExpr($2, $1);}
+arg_list: 
+	      | n_arg_list
 
-declaration: VAR_TOKEN ASSIGN_TOKEN expr { $$ = makeDeclarationCmd($1, $3);}
+n_arg_list: expr
+	        | expr COMMA_TOKEN n_arg_list
 
 if: IF_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
 
