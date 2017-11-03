@@ -45,6 +45,7 @@
 %type <stringValue> VAR_TOKEN
 */
 %type <expression> expr;
+%type <expression> expr_var;
 %type <expression> expr_bool;
 %type <expression> expr_bool_final;
 %type <expression> expr_arit;
@@ -97,7 +98,7 @@ packages:
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
 
-func: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
+func: FUNC_TOKEN expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
 func_list: {$$ = EMPTY_LIST;}
 	 | func func_list {$$ = root = prependCmd($2, $1);}
 
@@ -121,7 +122,7 @@ arg_list: {$$ = EMPTY_LIST;}
 n_arg_list: expr {$$ = makeExprList($1);}
 	        | expr COMMA_TOKEN n_arg_list {$$ = prependExpr($3, $1);}
 
-declaration: VAR_TOKEN ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, $3);}
+declaration: expr_var ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, $3);}
 
 if: IF_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
 
@@ -136,10 +137,10 @@ print: PRINT_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN  { $$ = makeFu
 
 scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall("fmt.scan", $3);}
 
-func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
+func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
 
-increment: VAR_TOKEN INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
-         | VAR_TOKEN INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}
+increment: expr_var INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
+         | expr_var INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}
 
 expr: expr_arit {$$ = $1;}
     | expr_bool {$$ = $1;}
@@ -147,7 +148,7 @@ expr: expr_arit {$$ = $1;}
 expr_arit: expr_arit arit_op expr_arit_final {$$ = ast_operation($2, $1, $3);}
     | expr_arit_final 
 
-expr_arit_final: VAR_TOKEN  { $$ = ast_variable(yylval.stringValue);}
+expr_arit_final: expr_var
     | INT_TOKEN { $$ = ast_integer(yylval.intValue);}
 
 expr_bool: expr_bool bool_op expr_bool_final {$$ = ast_operation($2, $1, $3);}
@@ -164,6 +165,7 @@ arit_comp: BINARY_REL_TOKEN
 
 arit_op: ADD_TOKEN
        | MUL_TOKEN 
+expr_var: VAR_TOKEN { $$ = ast_variable(yylval.stringValue);}
 
 %%
 

@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
     printf("%p\n", root);
     if (yyparse() == 0) {
       printf("%p\n", root);
+      printCmdList(root,0,1);
       // printf("Result = %d\n", eval(root));
     }
     return 0;
