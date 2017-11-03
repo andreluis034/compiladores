@@ -25,11 +25,13 @@ Cmd* getCmd(CmdList* list)
     return (Cmd*)list->Value;
 }
 
-Cmd* makeDeclarationCmd(Expr* variable, Expr* expr)
+Cmd* makeDeclarationCmd(Expr* variable, char* operator, Expr* expr)
 {
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));
     node->kind = C_DECLARATION;
-    node->attr.declaration = variable;// makeVariable(varName, expr);
+    node->attr.declaration.variable = variable;// makeVariable(varName, expr);
+    node->attr.declaration.operator = operator;
+    node->attr.declaration.expr = expr;
     return node;
 }
 
@@ -82,7 +84,11 @@ Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist)
 
 void printDeclaration(Cmd* cmd, int level, int lastChild)  
 {   
-    printExpr(cmd->attr.declaration, level, lastChild);
+    printPadding(level, lastChild);
+    printf("C_DECLARATION\n");
+    printExpr(cmd->attr.declaration.variable, level+1, 0);
+    printKeyValue("OPERATOR", cmd->attr.declaration.operator, level + 1, 0);
+    printExpr(cmd->attr.declaration.expr, level+1, 0);
 }
 
 void printIncrement(Cmd* cmd, int level, int lastChild)  
