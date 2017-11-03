@@ -23,20 +23,21 @@ Cmd* getCmd(CmdList* list)
     return (Cmd*)list->Value;
 }
 
-Cmd* makeDeclarationCmd(char* varName, Expr* expr)
+Cmd* makeDeclarationCmd(Expr* variable, Expr* expr)
 {
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));
     node->kind = C_DECLARATION;
-    node->attr.declaration = makeVariable(varName, expr);
+    node->attr.declaration = variable;// makeVariable(varName, expr);
     return node;
 }
 
-Cmd* makeIncrementCmd(char* varName, Expr* expr, char* operator)
+Cmd* makeIncrementCmd(Expr* variable, char* operator, Expr* expr)
 {
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));
     node->kind = C_INCREMENT;
-    node->attr.increment.variable = makeVariable(varName, expr);
+    node->attr.increment.variable = variable;// makeVariable(varName, expr);
     node->attr.increment.operator = operator;
+    node->attr.increment.expr = expr;
     return node;
 }
 
@@ -59,19 +60,18 @@ Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body )
     return node;
 }
 
-Cmd* makeFuncCall(char* funcName, List* variables, CmdList* body) 
+Cmd* makeFuncCall(char* funcName, ExprList* variables) 
 {
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));
     node->kind = C_FUNC_CALL;
     node->attr.funcCall.funcName = funcName;
     node->attr.funcCall.variables = variables;
-    node->attr.funcCall.body = body;
     return node;
 }
 
 void printDeclaration(Cmd* cmd, int level, int lastChild)  
-{
-    printVariable(cmd->attr.declaration, level, lastChild);
+{   
+    printExpr(cmd->attr.declaration, level, lastChild);
 }
 
 void printIncrement(Cmd* cmd, int level, int lastChild)  
@@ -80,7 +80,11 @@ void printIncrement(Cmd* cmd, int level, int lastChild)
     printf("C_INCREMENT\n");
     printKeyValue("OPERATOR", cmd->attr.increment.operator, 
     level + 1, 0);
-    printVariable(cmd->attr.increment.variable, level +1, 0);
+    printExpr(cmd->attr.increment.variable, level +1, cmd->attr.increment.expr == NULL);
+    if(cmd->attr.increment.expr != NULL)
+    {
+        printExpr(cmd->attr.increment.expr, level +1, 1);
+    }
 }
 void printIfElse(Cmd* cmd, int level, int lastChild)  
 {
@@ -104,11 +108,13 @@ void printFor(Cmd* cmd, int level, int lastChild)
         printCmd(cmd->attr.forCmd.initial, level + 1, 0);
     }
     //TODO print EXPR
+    printExpr(cmd->attr.forCmd.condition, level + 1, 0);
     //printCmd(cmd->attr.forCmd.condition, level + 1, cmd->attr.forCmd.afterIteration != NULL);
     if(cmd->attr.forCmd.afterIteration != NULL)
     {
-        printCmd(cmd->attr.forCmd.afterIteration, level + 1, 1);
+        printCmd(cmd->attr.forCmd.afterIteration, level + 1, 0);
     }
+    printCmdList(cmd->attr.forCmd.body, level + 1, 1);
 }
 void printFuncCall(Cmd* cmd, int level, int lastChild) //TODO
 {
@@ -150,8 +156,4 @@ void printCmdList(CmdList* cmdlist, int level, int lastChild)
     {
         printCmd(getCmd(cmdlist), level + 1, IS_EMPTY_LIST(cmdlist->Next));
     }
-}
-void printCmdTree(Cmd* cmd, int level, int lastChild) 
-{
-    printPadding(level, lastChild);
 }

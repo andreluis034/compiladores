@@ -1,6 +1,6 @@
 #pragma once
 #include "list.h"
-#include "variable.h"
+#include "ast.h"
 typedef List CmdList;
 struct _Cmd {
 	enum {
@@ -11,10 +11,11 @@ struct _Cmd {
 		C_FUNC_CALL
 	} kind;
 	union {
-		Variable* declaration;
+		Expr* declaration;
 		struct {
-			Variable* variable;
+			Expr* variable;
 			char* operator;
+			Expr* expr;
 		} increment;
 		struct {
 			struct _Expr* condition;
@@ -29,8 +30,7 @@ struct _Cmd {
         } forCmd;
         struct {
 			char* funcName;
-			List* variables;
-			CmdList* body;
+			ExprList* variables;
 		} funcCall;
 	} attr;
 };
@@ -42,9 +42,8 @@ CmdList* prependCmd(CmdList* list, Cmd* value);
 Cmd* getCmd(CmdList* list);
 void printCmd(Cmd* cmd, int level, int lastChild);
 void printCmdList(CmdList* cmdlist, int level, int lastChild);
-void printCmdTree(Cmd* cmd, int level, int lastChild);
-Cmd* makeDeclarationCmd(char* varName, Expr* expr);
-Cmd* makeIncrementCmd(char* varName, Expr* expr, char* operator);
+Cmd* makeDeclarationCmd(Expr* variable, Expr* expr);
+Cmd* makeIncrementCmd(Expr* variable, char* operator, Expr* expr );
 Cmd* makeIfElseCmd(Expr* expr, CmdList* iftrue, CmdList* iffalse );
 Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body );
-Cmd* makeFuncCall(char* funcName, List* variables, CmdList* body) ;
+Cmd* makeFuncCall(char* funcName, ExprList* variables) ;

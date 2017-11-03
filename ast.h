@@ -4,8 +4,7 @@
 #define __ast_h__
 
 #include "list.h"
-#include "variable.h"
-typedef struct _variable Variable;
+typedef List ExprList;
 
 // AST for expressions
 struct _Expr {
@@ -22,12 +21,15 @@ struct _Expr {
 			struct _Expr* left;
 			struct _Expr* right;
 		} op; // for binary expressions
-		Variable* variable;
+		char* variable;
 	} attr;
 };
 
 typedef struct _Expr Expr; // Convenience typedef
 
+ExprList* makeExprList(Expr* firstExpr);
+ExprList* appendExpr(ExprList* list, Expr* value);
+ExprList* prependExpr(ExprList* list, Expr* value);
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
 Expr* ast_variable(char* variable);

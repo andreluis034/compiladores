@@ -1,5 +1,4 @@
 #pragma once
-#include "ast.h"
 #define IS_EMPTY_LIST(a) (a == NULL)
 #define EMPTY_LIST NULL
 struct _list {
