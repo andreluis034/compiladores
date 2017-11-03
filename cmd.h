@@ -1,6 +1,6 @@
 #pragma once
 #include "list.h"
-
+#include "variable.h"
 typedef List CmdList;
 struct _Cmd {
 	enum {
@@ -11,14 +11,10 @@ struct _Cmd {
 		C_FUNC_CALL
 	} kind;
 	union {
+		Variable* declaration;
 		struct {
-			char* variableName;
-			struct _Expr* expression;
-		} declaration;
-		struct {
-			char* variableName;
+			Variable* variable;
 			char* operator;
-			struct _Expr* expression;
 		} increment;
 		struct {
 			struct _Expr* condition;
@@ -34,6 +30,7 @@ struct _Cmd {
         struct {
 			char* funcName;
 			List* variables;
+			CmdList* body;
 		} funcCall;
 	} attr;
 };
@@ -43,5 +40,11 @@ CmdList* makeCmdList(Cmd* firstCmd);
 CmdList* appendCmd(CmdList* list, Cmd* value);
 CmdList* prependCmd(CmdList* list, Cmd* value);
 Cmd* getCmd(CmdList* list);
+void printCmd(Cmd* cmd, int level, int lastChild);
 void printCmdList(CmdList* cmdlist, int level, int lastChild);
 void printCmdTree(Cmd* cmd, int level, int lastChild);
+Cmd* makeDeclarationCmd(char* varName, Expr* expr);
+Cmd* makeIncrementCmd(char* varName, Expr* expr, char* operator);
+Cmd* makeIfElseCmd(Expr* expr, CmdList* iftrue, CmdList* iffalse );
+Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body );
+Cmd* makeFuncCall(char* funcName, List* variables, CmdList* body) ;

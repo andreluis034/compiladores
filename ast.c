@@ -7,15 +7,23 @@
 
 Expr* ast_variable(char* varName)
 {
-	Expr* node = (Expr*) malloc(sizeof(Expr));
+ 	Expr* node = (Expr*) malloc(sizeof(Expr));
 	node->kind = E_VARIABLE;
-	node->attr.variableName = varName;
+	node->attr.variable = makeVariable(varName, NULL);
 	return node;
+	return NULL;
 }
 
 Expr* ast_integer(int v) {
 	Expr* node = (Expr*) malloc(sizeof(Expr));
 	node->kind = E_INTEGER;
+	node->attr.value = v;
+	return node;
+}
+
+Expr* ast_bool(int v) {
+	Expr* node = (Expr*) malloc(sizeof(Expr));
+	node->kind = E_BOOL;
 	node->attr.value = v;
 	return node;
 }
@@ -31,9 +39,7 @@ Expr* ast_operation(char* operator, Expr* left, Expr* right) {
 
 void print_variable(Expr* expr, int level, int lastChild)
 {
-	printPadding(level, lastChild);
-	printf("E_VARIABLE\n");
-	printKeyValue("NAME: ", expr->attr.variableName, level + 1, 1);
+	printVariable(expr->attr.variable, level, lastChild);
 }
 void print_operation(Expr* expr, int level, int lastChild)
 {

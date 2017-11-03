@@ -14,7 +14,8 @@ List* appendToList(List* list, void* value)
     {
         return makeList(value);
     }
-    for(List* list2 = list; list2 != NULL; list2 = list2->Next)
+    List* list2;
+    for(list2 = list; list2 != NULL; list2 = list2->Next)
     {
         if(list2->Next == NULL)
         {

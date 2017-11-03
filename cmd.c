@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "cmd.h"
 #include "utility.h"
+
 CmdList* makeCmdList(Cmd* firstCmd)
 {
     return (CmdList*)makeList((void*)firstCmd);
@@ -20,29 +23,64 @@ Cmd* getCmd(CmdList* list)
     return (Cmd*)list->Value;
 }
 
+Cmd* makeDeclarationCmd(char* varName, Expr* expr)
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_DECLARATION;
+    node->attr.declaration = makeVariable(varName, expr);
+    return node;
+}
 
+Cmd* makeIncrementCmd(char* varName, Expr* expr, char* operator)
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_INCREMENT;
+    node->attr.increment.variable = makeVariable(varName, expr);
+    node->attr.increment.operator = operator;
+    return node;
+}
+
+Cmd* makeIfElseCmd(Expr* expr, CmdList* iftrue, CmdList* iffalse )
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_IF_ELSE;
+    node->attr.ifelse.condition = expr;    
+    node->attr.ifelse.iftrue = iftrue;    
+    node->attr.ifelse.iffalse = iffalse;    
+    return node;
+}
+Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body )
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_FOR;
+    node->attr.forCmd.initial = initial;
+    node->attr.forCmd.condition = condition;
+    node->attr.forCmd.afterIteration = afterIteration;
+    return node;
+}
+
+Cmd* makeFuncCall(char* funcName, List* variables, CmdList* body) 
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_FUNC_CALL;
+    node->attr.funcCall.funcName = funcName;
+    node->attr.funcCall.variables = variables;
+    node->attr.funcCall.body = body;
+    return node;
+}
 
 void printDeclaration(Cmd* cmd, int level, int lastChild)  
 {
-    printPadding(level, lastChild);
-    printf("C_DECLARATION\n");
-    printKeyValue("OPERATOR", ":=", level + 1, 0);
-    printKeyValue("VARNAME", cmd->attr.declaration.variableName, level + 1, 0);
-    //printPadding(level + 1, 1);
-    //TODO PRINT DECLARATION
+    printVariable(cmd->attr.declaration, level, lastChild);
 }
 
 void printIncrement(Cmd* cmd, int level, int lastChild)  
 {
     printPadding(level, lastChild);
     printf("C_INCREMENT\n");
-    printKeyValue("VARNAME", cmd->attr.increment.variableName, level + 1, 0);
     printKeyValue("OPERATOR", cmd->attr.increment.operator, 
-        level + 1, cmd->attr.increment.expression == NULL);
-    if( cmd->attr.increment.expression != NULL)
-    {
-        //TODO print EXPR
-    }
+    level + 1, 0);
+    printVariable(cmd->attr.increment.variable, level +1, 0);
 }
 void printIfElse(Cmd* cmd, int level, int lastChild)  
 {
@@ -57,7 +95,7 @@ void printIfElse(Cmd* cmd, int level, int lastChild)
     }
 }
 
-printFor(Cmd* cmd, int level, int lastChild) 
+void printFor(Cmd* cmd, int level, int lastChild) 
 {
     printPadding(level, lastChild);
     printf("C_FOR\n");
@@ -72,7 +110,7 @@ printFor(Cmd* cmd, int level, int lastChild)
         printCmd(cmd->attr.forCmd.afterIteration, level + 1, 1);
     }
 }
-printFuncCall(Cmd* cmd, int level, int lastChild) 
+void printFuncCall(Cmd* cmd, int level, int lastChild) //TODO
 {
     printPadding(level, lastChild);
     printf("C_FUNC_CALL\n");
@@ -110,7 +148,7 @@ void printCmdList(CmdList* cmdlist, int level, int lastChild)
     printf("CmdList\n");
     while(cmdlist != NULL)
     {
-        printCmdTree(getCmd(cmdlist), level + 1, IS_EMPTY_LIST(cmdlist->Next));
+        printCmd(getCmd(cmdlist), level + 1, IS_EMPTY_LIST(cmdlist->Next));
     }
 }
 void printCmdTree(Cmd* cmd, int level, int lastChild) 
