@@ -89,7 +89,7 @@ CmdList* root;
 
 %%
 
-prog: packages imports func_list
+prog: packages imports cmd_list
 
 
 packages:
@@ -98,7 +98,10 @@ packages:
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
 
-func: FUNC_TOKEN expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
+func_declaration: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
+
+func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
+
 func_list: {$$ = EMPTY_LIST;}
 	 | func func_list {$$ = root = prependCmd($2, $1);}
 
@@ -115,6 +118,14 @@ cmd: declaration SEPARATOR_TOKEN
    | print SEPARATOR_TOKEN
    | scan SEPARATOR_TOKEN
    | func_call SEPARATOR_TOKEN
+   | func_declaration
+
+
+var_list:
+          | n_var_list
+
+n_var_list: VAR_TOKEN
+          | VAR_TOKEN COMMA_TOKEN n_var_list
 
 arg_list: {$$ = EMPTY_LIST;}
 	      | n_arg_list
@@ -136,8 +147,6 @@ for_three_arg: FOR_TOKEN declaration SEPARATOR_TOKEN expr_bool SEPARATOR_TOKEN i
 print: PRINT_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN  { $$ = makeFuncCall("fmt.print", $3);}
 
 scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall("fmt.scan", $3);}
-
-func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
 
 increment: expr_var INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
          | expr_var INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}
