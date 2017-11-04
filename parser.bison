@@ -9,8 +9,8 @@
 %token FOR_TOKEN
 %token ELSE_TOKEN
 %token SEPARATOR_TOKEN
-%token <expression> INT_TOKEN
-%token <expression> BOOL_TOKEN
+%token <intValue> INT_TOKEN
+%token <boolValue> BOOL_TOKEN
 %token <stringValue> BINARY_TOKEN
 %token <stringValue> BINARY_REL_TOKEN
 %token <stringValue> REL_TOKEN
@@ -45,6 +45,7 @@
 %type <stringValue> VAR_TOKEN
 */
 %type <expression> expr;
+%type <expression> expr_token;
 %type <expression> expr_var;
 %type <stringValue> binary_op;
 %type <cmdList> cmd_list;
@@ -147,14 +148,14 @@ scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncC
 increment: expr_var INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
          | expr_var INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}
 
-expr: OPENPAR_TOKEN expr CLOSEPAR_TOKEN
+expr: OPENPAR_TOKEN expr CLOSEPAR_TOKEN {$$ = $2;}
     | expr_token
     | expr binary_op expr_token
 
 
-expr_token: BOOL_TOKEN
-          | INT_TOKEN
-          | VAR_TOKEN           
+expr_token: BOOL_TOKEN { $$ = ast_bool($1);}
+          | INT_TOKEN { $$ = ast_integer($1);}
+          | VAR_TOKEN { $$ = ast_variable($1);}       
 
 binary_op: REL_TOKEN
          | BINARY_REL_TOKEN   
