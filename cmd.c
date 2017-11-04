@@ -108,12 +108,12 @@ void printIfElse(Cmd* cmd, int level, int lastChild)
 {
     printPadding(level, lastChild);
     printf("C_IF_ELSE\n");
-    //TODO print EXPR
     lastChild = IS_EMPTY_LIST( cmd->attr.ifelse.iffalse );
+    printExpr(cmd->attr.ifelse.condition, level + 1, 0);
     printCmdList(cmd->attr.ifelse.iftrue, level + 1, lastChild);
     if(!lastChild)
     {
-        printCmdList(cmd->attr.ifelse.iffalse, level + 1, lastChild);
+        printCmdList(cmd->attr.ifelse.iffalse, level + 1, 1);
     }
 }
 
