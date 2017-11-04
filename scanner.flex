@@ -22,9 +22,10 @@ int yycharCount = 0;
 
 :=|=  { 
          //printf("ASSIGN_TOKEN\n");
-         sumChars;
-         return ASSIGN_TOKEN;
-      }
+        yylval.stringValue = strdup(yytext);
+        sumChars;
+        return ASSIGN_TOKEN;
+}
 
 "package" {
              //printf("PACKAGE_TOKEN\n");
