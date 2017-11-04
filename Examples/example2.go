@@ -11,7 +11,7 @@ func main() {
 
 	fmt.Scan(bool_value);
 
-	if cenas == true {
+	if 5+5 == true {
 
 		converted_value = 1;
 

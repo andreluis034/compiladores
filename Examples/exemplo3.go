@@ -13,6 +13,6 @@ func main() {
         }
     }
     //a := -0.2;
-    a = -(5);
+    a = ((5));
     fmt.Print(a,v,d);
 }
