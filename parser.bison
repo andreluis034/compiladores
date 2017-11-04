@@ -1,7 +1,7 @@
 %start prog;
 
 
-%token <expression> VAR_TOKEN
+%token <stringValue> VAR_TOKEN
 %token <command> FUNC_TOKEN
 %token PRINT_FUNCTION_TOKEN
 %token SCAN_FUNCTION_TOKEN
@@ -16,7 +16,7 @@
 %token <stringValue> REL_TOKEN
 %token <stringValue> INCREMENT_TOKEN 
 
-%left <command> ASSIGN_TOKEN
+%left <stringValue> ASSIGN_TOKEN
 %left <stringValue> ADD_TOKEN
 %left <stringValue> MUL_TOKEN
 %token PACKAGE_TOKEN
@@ -132,7 +132,7 @@ arg_list: {$$ = EMPTY_LIST;}
 n_arg_list: expr {$$ = makeExprList($1);}
 	        | expr COMMA_TOKEN n_arg_list {$$ = prependExpr($3, $1);}
 
-declaration: expr_var ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, ":=", $3); /*TODO GET OPERATOR*/}
+declaration: expr_var ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, $2, $3);}
 
 if: IF_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
 
@@ -173,7 +173,7 @@ arit_comp: BINARY_REL_TOKEN
 
 arit_op: ADD_TOKEN
        | MUL_TOKEN 
-expr_var: VAR_TOKEN { $$ = ast_variable(yylval.stringValue);}
+expr_var: VAR_TOKEN { $$ = ast_variable($1);}
 
 %%
 
