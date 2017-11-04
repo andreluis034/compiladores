@@ -1,3 +1,5 @@
 *.o
 scanner.c
 parser.c
+compiler
+parser.h

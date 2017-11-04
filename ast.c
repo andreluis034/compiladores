@@ -20,7 +20,7 @@ ExprList* prependExpr(ExprList* list, Expr* value)
 
 Expr* getExpr(ExprList* list) 
 {
-    return (Expr*)list->Value;
+    return (Expr*)getPointer(list);
 }
 
 Expr* ast_variable(char* varName)
@@ -60,7 +60,7 @@ void print_variable(Expr* expr, int level, int lastChild)
 {
 	printPadding(level, lastChild);
 	printf("E_VARIABLE\n");
-	printKeyValue("NAME", expr->attr.variable, level + 1, lastChild);
+	printKeyValue("NAME", expr->attr.variable, level + 1, 1);
 }
 void print_operation(Expr* expr, int level, int lastChild)
 {

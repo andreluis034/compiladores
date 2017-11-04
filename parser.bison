@@ -122,7 +122,7 @@ arg_list: {$$ = EMPTY_LIST;}
 n_arg_list: expr {$$ = makeExprList($1);}
 	        | expr COMMA_TOKEN n_arg_list {$$ = prependExpr($3, $1);}
 
-declaration: expr_var ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, ":=", $3);}
+declaration: expr_var ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, ":=", $3); /*TODO GET OPERATOR*/}
 
 if: IF_TOKEN expr_bool OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
 

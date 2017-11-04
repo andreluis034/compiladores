@@ -37,4 +37,6 @@ Expr* ast_variable(char* variable);
 Expr* ast_operation(char* operator, Expr* left, Expr* right);
 Expr* ast_bool(int v);
 void printExpr(Expr* expr, int level, int lastChild);
+void printExprList(ExprList* Exprlist, int level, int lastChild);
+
 #endif

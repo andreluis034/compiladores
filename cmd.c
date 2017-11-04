@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "cmd.h"
+#include "ast.h"
 #include "utility.h"
 #define sCase(caso, func) case caso: \
 func(cmd, level, lastChild);\
@@ -22,7 +23,7 @@ CmdList* prependCmd(CmdList* list, Cmd* value)
 
 Cmd* getCmd(CmdList* list) 
 {
-    return (Cmd*)list->Value;
+    return (Cmd*)getPointer(list);
 }
 
 Cmd* makeDeclarationCmd(Expr* variable, char* operator, Expr* expr)
@@ -88,7 +89,7 @@ void printDeclaration(Cmd* cmd, int level, int lastChild)
     printf("C_DECLARATION\n");
     printExpr(cmd->attr.declaration.variable, level+1, 0);
     printKeyValue("OPERATOR", cmd->attr.declaration.operator, level + 1, 0);
-    printExpr(cmd->attr.declaration.expr, level+1, 0);
+    printExpr(cmd->attr.declaration.expr, level+1, 1);
 }
 
 void printIncrement(Cmd* cmd, int level, int lastChild)  
@@ -138,7 +139,7 @@ void printFuncCall(Cmd* cmd, int level, int lastChild)
     printKeyValue("NAME", cmd->attr.funcCall.funcName, level + 1, IS_EMPTY_LIST(cmd->attr.funcCall.variables));
     if(!IS_EMPTY_LIST(cmd->attr.funcCall.variables))
     {
-        printExprList(cmd->attr.funcCall.variables);
+        printExprList(cmd->attr.funcCall.variables, level + 1, 1);
     }
 }
 
@@ -148,7 +149,7 @@ void printFunc(Cmd* cmd, int level, int lastChild)
     printf("C_FUNC\n");
     printKeyValue("NAME", cmd->attr.func.funcName, level + 1, 0);
     printExprList(cmd->attr.func.argList, level + 1, 0);
-    printCmdList(cmd->attr.func.commandList, level + 1, 0);
+    printCmdList(cmd->attr.func.commandList, level + 1, 1);
 }
 
 void printCmd(Cmd* cmd, int level, int lastChild)  
