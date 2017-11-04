@@ -60,13 +60,13 @@ int yycharCount = 0;
 
 ==|!= { 
 	yylval.stringValue = strdup(yytext);
-    printf("BINARY_REL_TOKEN\n");
+    //printf("BINARY_REL_TOKEN\n");
     sumChars;
 	return BINARY_REL_TOKEN;
 }
 \<|\<\=|\>|\>\= { 
 	yylval.stringValue = strdup(yytext);
-    printf("REL_TOKEN\n");
+    //printf("REL_TOKEN\n");
 	return REL_TOKEN;
 }
 

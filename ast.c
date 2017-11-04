@@ -25,12 +25,10 @@ Expr* getExpr(ExprList* list)
 
 Expr* ast_variable(char* varName)
 {
-	printf("var: %s\n", varName);
  	Expr* node = (Expr*) malloc(sizeof(Expr));
 	node->kind = E_VARIABLE;
 	node->attr.variable = varName;//makeVariable(varName, NULL);
 	return node;
-	return NULL;
 }
 
 Expr* ast_integer(int v) {
@@ -64,7 +62,7 @@ void print_variable(Expr* expr, int level, int lastChild)
 }
 void print_operation(Expr* expr, int level, int lastChild)
 {
-	printPadding(level + 1, 0);
+	printPadding(level, 0);
 	printf("E_OPERATION\n");
 	printExpr(expr->attr.op.left, level + 1, 0);
 	printKeyValue("OPERATOR: ", expr->attr.op.operator, level + 1, 0);
