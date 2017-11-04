@@ -58,7 +58,9 @@
 %type <cmdList> if_else;
 %type <exprList> arg_list;
 %type <exprList> n_arg_list;
-%type <command> func;
+%type <exprList> var_list;
+%type <exprList> n_var_list;
+%type <command> func_declaration;
 %type <command> cmd;
 %type <command> declaration
 %type <command> increment
@@ -103,7 +105,7 @@ func_declaration: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPE
 func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
 
 func_list: {$$ = EMPTY_LIST;}
-	 | func func_list {$$ = root = prependCmd($2, $1);}
+	 | func_declaration func_list {$$ = root = prependCmd($2, $1);}
 
 cmd_list: {$$ = EMPTY_LIST;};
 	 | cmd cmd_list {$$ = prependCmd($2, $1);}
