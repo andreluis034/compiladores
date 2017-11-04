@@ -11,7 +11,7 @@ func main() {
 
 	fmt.Scan(bool_value);
 
-	if 5+5 == true {
+	if true == bool_value {
 
 		converted_value = 1;
 

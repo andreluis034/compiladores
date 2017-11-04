@@ -49,6 +49,7 @@
 %type <expression> expr_var;
 %type <stringValue> binary_op;
 %type <cmdList> cmd_list;
+%type <cmdList> func_list;
 %type <cmdList> if_else;
 %type <exprList> arg_list;
 %type <exprList> n_arg_list;
@@ -79,6 +80,9 @@
 extern int yylex();
 extern char* yytext;
 extern FILE* yyin;
+extern int linesCount;
+extern int yycharCount;
+
 extern void yyerror(const char* msg);
 CmdList* root;
 }
@@ -94,8 +98,8 @@ packages:
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
 
-func_list:
-         | func_declaration func_list
+func_list: {$$ = EMPTY_LIST;};
+         | func_declaration func_list {$$ = root =  prependCmd($2, $1);}
 
 func_declaration: FUNC_TOKEN expr_var OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
 
@@ -103,7 +107,7 @@ func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1
 
 
 cmd_list: {$$ = EMPTY_LIST;};
-	 | cmd cmd_list {$$ = root = prependCmd($2, $1);}
+	 | cmd cmd_list {$$ = prependCmd($2, $1);}
 
 
 
@@ -150,7 +154,7 @@ increment: expr_var INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
 
 expr: OPENPAR_TOKEN expr CLOSEPAR_TOKEN {$$ = $2;}
     | expr_token
-    | expr binary_op expr_token
+    | expr binary_op expr_token {$$ = ast_operation($2, $1, $3);}
 
 
 expr_token: BOOL_TOKEN { $$ = ast_bool($1);}
@@ -167,6 +171,6 @@ expr_var: VAR_TOKEN { $$ = ast_variable($1);}
 %%
 
 void yyerror(const char* err) {
-  printf("error: %s\n", err );
+  printf("error: %s, line: %d, char: %d\n", err, linesCount, yycharCount );
 }
 
