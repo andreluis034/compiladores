@@ -90,7 +90,7 @@ CmdList* root;
 
 %%
 
-prog: packages imports cmd_list
+prog: packages imports func_list
 
 
 packages:
@@ -98,6 +98,9 @@ packages:
 
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
+
+func_list:
+         | func_declaration func_list
 
 func_declaration: FUNC_TOKEN expr_var OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
 
