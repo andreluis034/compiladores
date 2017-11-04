@@ -53,7 +53,6 @@
 %type <stringValue> arit_op;
 %type <stringValue> arit_comp;
 %type <stringValue> bool_op;
-%type <cmdList> func_list;
 %type <cmdList> cmd_list;
 %type <cmdList> if_else;
 %type <exprList> arg_list;
@@ -100,15 +99,13 @@ packages:
 imports:
 	| IMPORT_TOKEN QUOTES_TOKEN VAR_TOKEN QUOTES_TOKEN imports
 
-func_declaration: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
+func_declaration: FUNC_TOKEN expr_var OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
 
 func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
 
-func_list: {$$ = EMPTY_LIST;}
-	 | func_declaration func_list {$$ = root = prependCmd($2, $1);}
 
 cmd_list: {$$ = EMPTY_LIST;};
-	 | cmd cmd_list {$$ = prependCmd($2, $1);}
+	 | cmd cmd_list {$$ = root = prependCmd($2, $1);}
 
 
 
@@ -123,11 +120,11 @@ cmd: declaration SEPARATOR_TOKEN
    | func_declaration
 
 
-var_list:
+var_list:{$$ = EMPTY_LIST;}
           | n_var_list
 
-n_var_list: VAR_TOKEN
-          | VAR_TOKEN COMMA_TOKEN n_var_list
+n_var_list: expr_var  {$$ = makeExprList($1);}
+          | expr_var COMMA_TOKEN n_var_list {$$ = prependExpr($3, $1);}
 
 arg_list: {$$ = EMPTY_LIST;}
 	      | n_arg_list
