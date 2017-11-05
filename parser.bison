@@ -101,9 +101,9 @@ imports:
 func_list: {$$ = EMPTY_LIST;};
          | func_declaration func_list {$$ = root =  prependCmd($2, $1);}
 
-func_declaration: FUNC_TOKEN expr_var OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2->attr.variable, $4, $7);}
+func_declaration: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN {$$ = makeFunc($2, $4, $7);}
 
-func_call: expr_var OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1->attr.variable, $3);}
+func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1, $3);}
 
 
 cmd_list: {$$ = EMPTY_LIST;};
