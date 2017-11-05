@@ -119,7 +119,6 @@ cmd: declaration SEPARATOR_TOKEN
    | print SEPARATOR_TOKEN
    | scan SEPARATOR_TOKEN
    | func_call SEPARATOR_TOKEN
-   | func_declaration
 
 
 var_list:{$$ = EMPTY_LIST;}
