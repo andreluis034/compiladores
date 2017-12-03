@@ -10,14 +10,21 @@ typedef enum
 	SUB,
 	MUL,
 	DIV,
-	LESS, //BRANCH
-	ATRIB
+	EQL,
+	OR,
+	AND,
 } InstType;
 
-typedef union 
+typedef struct 
 {
-	char* str;
-	int number;
+	enum {
+		S_STR,
+		S_INT
+	}	type;
+	union {
+		char* str;
+		int number;
+	}	symbol;
 } InstSymbol;
 
 typedef struct 

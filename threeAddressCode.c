@@ -14,13 +14,15 @@ concatType(InstList*, concatInst)
 InstSymbol* makeInstSymbolStr(char* str)
 {
 	InstSymbol* i = (InstSymbol*) malloc(sizeof(InstSymbol));
-	i->str = str;
+	i->type = S_STR;
+	i->symbol.str = str;
 	return i;
 }
 InstSymbol* makeInstSymbolInt(int intlel)
 {
 	InstSymbol* i = (InstSymbol*) malloc(sizeof(InstSymbol));
-	i->number = intlel;
+	i->type = S_INT;
+	i->symbol.number = intlel;
 	return i;
 }
 
@@ -41,16 +43,12 @@ Pair* makePair(InstSymbol* symbol, InstList* list)
 
 Pair* makePairInt(int i, InstList* list)
 {
-	InstSymbol* symbol = malloc(sizeof(InstSymbol));
-	symbol->number = i;
-	return makePair(symbol, list);
+	return makePair(makeInstSymbolInt(i), list);
 }
 
 Pair* makePairStr(char* str, InstList* list) 
 {
-	InstSymbol* symbol = malloc(sizeof(InstSymbol));
-	symbol->str = str;
-	return makePair(symbol, list);
+	return makePair(makeInstSymbolStr(str), list);
 }
 
 Inst* makeInstruction(InstType type, InstSymbol* s1, InstSymbol* s2, InstSymbol* s3)
@@ -63,16 +61,24 @@ Inst* makeInstruction(InstType type, InstSymbol* s1, InstSymbol* s2, InstSymbol*
 	return inst;
 
 }
+#define compileOperator(ifORElseIF, op, enum) ifORElseIF(strcmp(operator, op) == 0) {\
+	Inst* inst = makeInstruction(enum, nextSymbol, left->symbol, right->symbol);\
+	requiredInstructions = appendInst(requiredInstructions, inst);\
+} 
+
 //NAKANAIDE IMA WA
 Pair* CompileExpression(char* operator, Pair* left, Pair* right) 
 {
-	InstSymbol* nextSymbol = getNextSymbol();
+	InstSymbol* nextSymbol = getNextSymbol();//TODO: use one of the expressions
 	InstList* requiredInstructions = concatInst(left->instructionList, left->instructionList); 
-	if(strcmp(operator, "*") == 0) 
-	{
-		Inst* inst = makeInstruction(MUL, nextSymbol, left->symbol, right->symbol);
-		requiredInstructions = appendInst(requiredInstructions, inst);
-	}
+	compileOperator(if, "*", MUL)
+	compileOperator(else if, "/", DIV)
+	compileOperator(else if, "+", ADD)
+	compileOperator(else if, "-", SUB)
+	compileOperator(else if, "==", EQL)
+	compileOperator(else if, "||", OR)
+	compileOperator(else if, "&&", AND)
+
 	return makePair(nextSymbol, requiredInstructions);
 }
 
@@ -86,6 +92,7 @@ Pair* makePairExpr(Expr* expr)
 	Pair* p2;
 	switch(expr->kind) 
 	{
+		case E_BOOL:
 		case E_INTEGER:
 			return makePairInt(expr->attr.value, NULL);
 		case E_VARIABLE: 
