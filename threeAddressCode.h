@@ -22,16 +22,16 @@ typedef union
 
 typedef struct 
 {
-	InstSymbol first;
+	InstSymbol* symbol;
 	InstList* instructionList;
 } Pair;
 
 typedef struct 
 {
 	InstType type;
-	InstSymbol p1;
-	InstSymbol p2;
-	InstSymbol p3;
+	InstSymbol* p1;
+	InstSymbol* p2;
+	InstSymbol* p3;
 } Inst;
 
-InstList* compileExpression(Expr* expr);
+Pair* makePairExpr(Expr* expr);
