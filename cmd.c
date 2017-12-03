@@ -8,24 +8,18 @@
 #define sCase(caso, func) case caso: \
 func(cmd, level, lastChild);\
 break
-CmdList* makeCmdList(Cmd* firstCmd)
-{
-    return (CmdList*)makeList((void*)firstCmd);
-}
-CmdList* appendCmd(CmdList* list, Cmd* value) 
-{
-    return (CmdList*)appendToList(list, (void*)value);
-}
-CmdList* prependCmd(CmdList* list, Cmd* value) 
-{
-    return (CmdList*)prependToList(list, (void*)value);    
-}
+makeTypeList(CmdList*, makeCmdList, Cmd*)
+appendType(CmdList*, appendCmd, Cmd*)
+prependType(CmdList*, prependCmd, Cmd*)
+getType(Cmd*, getCmd, CmdList*)
 
+
+/*
 Cmd* getCmd(CmdList* list) 
 {
     return (Cmd*)getPointer(list);
 }
-
+*/
 Cmd* makeDeclarationCmd(Expr* variable, char* operator, Expr* expr)
 {
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));

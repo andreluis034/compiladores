@@ -24,8 +24,24 @@ List* makeInt(int Value)
     list->Value.number = Value;
     return list;
 }
-
-
+List* concatList(List* l1, List* l2) 
+{
+    List* copy1 = makeCopy(l1);
+    List* start1 = copy1;
+    while(copy1->Next != NULL)
+        copy1 = copy1->Next;
+    copy1->Next = makeCopy(l2);
+    return start1;
+}
+List* makeCopy(List* l1) 
+{
+    List* l2 = EMPTY_LIST;
+    while(l1 != NULL) {
+        l2 = appendToList(l2, l1->Value.pointer);
+        l1 = l1->Next;
+    }
+    return l2;
+}
 List* appendToList(List* list, void* value) 
 {
     if(IS_EMPTY_LIST(list))
@@ -70,6 +86,7 @@ List* popIntFromList(List* list)
     free(list);
     return list2;
 }
+
 int peekIntFromList(List* list)
 {
     if(list == NULL)
