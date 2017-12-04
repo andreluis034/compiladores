@@ -6,13 +6,24 @@ typedef List InstList;
 
 typedef enum 
 {
+	//Expressions
 	ADD,
 	SUB,
 	MUL,
 	DIV,
 	EQL,
-	OR,
-	AND,
+	OR,	
+	AND,//\<|\<\=|\>|\>\=
+	LESS,
+	LESSEQ,
+	MORE,
+	MOREEQ,
+	//Commands
+	MOV,
+	LABEL,
+	BRANCH_EQ_ZERO,
+	BRANCH_NOT_EQ_ZERO,
+	GOTO
 } InstType;
 
 typedef struct 
