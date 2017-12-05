@@ -167,7 +167,8 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList, 
 				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
-			freeRegister(compiledExpr->symbol);
+			if(compiledExpr->symbol->type == S_STR)
+				freeRegister(compiledExpr->symbol);
 			break;
 		case C_INCREMENT:
 			var = makePairExpr(cmd->attr.increment.variable);
@@ -187,7 +188,8 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList, 
 				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
-			freeRegister(compiledExpr->symbol);
+			if(compiledExpr->symbol->type == S_STR)
+				freeRegister(compiledExpr->symbol);
 
 			//appendInst(makeInstruction(ADD,))
 			break;
