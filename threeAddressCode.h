@@ -55,6 +55,14 @@ typedef struct
 	InstSymbol* p3;
 } Inst;
 
+typedef struct 
+{
+	int registerNumber;
+	int used;
+	char* registerName;
+	char* variableRepresented;
+} Register;
+
 InstList* compileCommand(Cmd* cmd);
 InstList* compileCmdList(CmdList* cmdlist);
 Pair* makePairExpr(Expr* expr);
