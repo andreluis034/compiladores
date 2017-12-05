@@ -5,7 +5,16 @@
 #define SYMBOL_INT(NUM) (instruction->p##NUM->symbol.number)
 #define SYMBOL_IS_INT(NUM) (instruction->p##NUM->type == S_INT)
 #define SYMBOL_IS_STR(NUM) (instruction->p##NUM->type == S_STR)
-
+/** Might be useful
+ * .macro push (%register)
+sub $sp,$sp,4
+sw %register,($sp)
+.end_macro
+.macro pop (%register)
+lw %register,($sp)
+addiu $sp,$sp,4
+.end_macro
+*/
 void printSimpleOperation(Inst* instruction, char* addorsub){
 
     if(addorsub[0]=='a' || addorsub[0]=='s'){
