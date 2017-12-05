@@ -54,4 +54,6 @@ typedef struct
 	InstSymbol* p3;
 } Inst;
 
+InstList* compileCommand(Cmd* cmd);
+InstList* compileCmdList(CmdList* cmdlist);
 Pair* makePairExpr(Expr* expr);
