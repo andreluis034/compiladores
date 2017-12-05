@@ -6,11 +6,12 @@
 #define SYMBOL_IS_INT(NUM) (instruction->p##NUM->type == S_INT)
 #define SYMBOL_IS_STR(NUM) (instruction->p##NUM->type == S_STR)
 
-void printADDSUB(Inst* instruction, char* addorsub){
+void printSimpleOperation(Inst* instruction, char* addorsub){
 
-    if(SYMBOL_IS_INT(2) && SYMBOL_IS_INT(3))
+    if(addorsub[0]=='a' || addorsub[0]=='s'){
+      if(SYMBOL_IS_INT(2) && SYMBOL_IS_INT(3))
             {
-                printf("%si %s $0 %d\n",addorsub,SYMBOL_STR(1),SYMBOL_INT(2));
+                printf("li %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
                 printf("%si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(1),SYMBOL_INT(3));
             }
             else
@@ -26,7 +27,32 @@ void printADDSUB(Inst* instruction, char* addorsub){
                 else{
                     printf("%s %s %s %s\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
                 }
+            }  
+    }
+
+    if(addorsub[0]=='m' || addorsub[0]=='d'){
+      if(SYMBOL_IS_INT(2) && SYMBOL_IS_INT(3))
+            {
+                printf("li %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
+                printf("%s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(1),SYMBOL_INT(3));
             }
+            else
+            {
+                if(SYMBOL_IS_STR(2) && SYMBOL_IS_INT(3)){
+                    printf("%s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_INT(3));
+                }
+
+                else if (SYMBOL_IS_INT(2) && SYMBOL_IS_STR(3))
+                {
+                    printf("%s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(3),SYMBOL_INT(2));
+                }
+                else{
+                    printf("%s %s %s %s\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
+                }
+            }  
+    }
+
+    
 }
 
 void compileSingleInstruction(Inst* instruction)
@@ -39,12 +65,23 @@ void compileSingleInstruction(Inst* instruction)
             printf("%s:\n", instruction->p1->symbol.str);
             break;
         case ADD:
-            printADDSUB(instruction,"add");
+            printSimpleOperation(instruction,"add");
             break;
-         case SUB:
-            printADDSUB(instruction,"sub");
+        case SUB:
+            printSimpleOperation(instruction,"sub");
             break;
-
+        case MUL:
+            printSimpleOperation(instruction,"mul");
+        break;
+        case DIV:
+            printSimpleOperation(instruction,"div");
+        break;
+        case GOTO:
+            printf("j %s\n",SYMBOL_STR(1));
+        break;
+        case RETURN:
+            printf("jr $ra\n");
+        break;
     }
 }
 

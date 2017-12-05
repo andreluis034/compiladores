@@ -5,7 +5,5 @@ package main
 import "fmt"
 
 func main(d,e) {
-	a:=68;
-	b:=1;
-	total:=a+b;
+	linda_variavel:=1*69+0+2-2;
 }

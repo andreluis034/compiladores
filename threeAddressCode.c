@@ -56,6 +56,7 @@ InstSymbol* getNextSymbol()
 		printf("#COULD NOT GET ENOUGH REGISTERS\n");
 		exit(-1);
 	}
+	registerUsed[reg]=1;
 	char* totallySafeBuffer = (char*) malloc(13);
 	snprintf(totallySafeBuffer, 13, "$%d", reg);
 	return makeInstSymbolStr(totallySafeBuffer);
