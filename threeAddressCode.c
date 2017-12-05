@@ -42,18 +42,18 @@ void freeRegister(InstSymbol* symb)
 {
 	if(symb->type == S_INT) 
 	{
-		printf("#TRYING TO FREE CONSTANT");
+		printf("#TRYING TO FREE CONSTANT %d\n", symb->symbol.number);
 		exit(-1);
 		return;
 	}
-	int i = atoi(symb->symbol.str);
+	int i = atoi(&symb->symbol.str[1]);
 	registerUsed[i] = 0;
 }
 InstSymbol* getNextSymbol() 
 {
 	int reg = getUnsusedRegister();
 	if(reg == -1) {
-		printf("#COULD NOT GET ENOUGH REGISTERS");
+		printf("#COULD NOT GET ENOUGH REGISTERS\n");
 		exit(-1);
 	}
 	char* totallySafeBuffer = (char*) malloc(13);
@@ -103,8 +103,10 @@ Inst* makeInstruction(InstType type, InstSymbol* s1, InstSymbol* s2, InstSymbol*
 //NAKANAIDE IMA WA
 Pair* CompileExpression(char* operator, Pair* left, Pair* right) 
 {
-	freeRegister(&left->symbol[1]);
-	freeRegister(&right->symbol[1]);
+	if(left->symbol->type == S_STR)
+		freeRegister(left->symbol);
+	if(right->symbol->type == S_STR)
+		freeRegister(right->symbol);
 	InstSymbol* nextSymbol = getNextSymbol();//TODO: use one of the expressions
 	InstList* requiredInstructions = concatInst(left->instructionList, right->instructionList); 
 	COMPILE_OPERATOR(if, "*", MUL)
@@ -234,6 +236,7 @@ InstList* compileCommand(Cmd* cmd)
 			compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
 			instructionList = compileCmdList(cmd->attr.func.commandList);
 			instructionList = prependInst(instructionList, compiledInst);
+			instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
 			//TODO jal?
 			break;
 	}

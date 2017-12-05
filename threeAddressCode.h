@@ -25,7 +25,8 @@ typedef enum
 	LABEL,
 	BRANCH_EQ_ZERO,
 	BRANCH_NOT_EQ_ZERO,
-	GOTO
+	GOTO,
+	RETURN
 } InstType;
 
 typedef struct 
