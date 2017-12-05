@@ -96,7 +96,13 @@ Pair* CompileExpression(char* operator, Pair* left, Pair* right)
 
 InstList* compileCmdList(CmdList* cmdlist) 
 {
-	return NULL; //TODO
+	InstList* instList  = NULL;
+	while(cmdlist != NULL) {
+		instList = concatInst(instList, compileCommand(getCmd(cmdlist)));
+		cmdlist = cmdlist->Next;
+	}
+	return instList; 
+
 }
 /*		C_DECLARATION,
 		C_INCREMENT,
