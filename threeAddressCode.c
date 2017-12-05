@@ -119,9 +119,8 @@ InstSymbol* getNextSymbol(int reg)
 		printf("#COULD NOT GET ENOUGH REGISTERS\n");
 		exit(-1);
 	}
-//	char* totallySafeBuffer = (char*) malloc(13);
-//	snprintf(totallySafeBuffer, 13, "%s", registers[reg].registerName);
 	return makeInstSymbolStr(registers[reg].registerName);
+
 }
 
 InstSymbol* getLabel() 
