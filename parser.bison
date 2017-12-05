@@ -17,8 +17,8 @@
 %token <stringValue> INCREMENT_TOKEN 
 
 %left <stringValue> ASSIGN_TOKEN
-%left <stringValue> ADD_TOKEN
 %left <stringValue> MUL_TOKEN
+%left <stringValue> ADD_TOKEN
 %token PACKAGE_TOKEN
 %token IMPORT_TOKEN
 %token QUOTES_TOKEN 
@@ -45,6 +45,8 @@
 %type <stringValue> VAR_TOKEN
 */
 %type <expression> expr;
+%type <expression> mul_expr;
+%type <expression> add_expr;
 %type <expression> expr_token;
 %type <expression> expr_var;
 %type <stringValue> binary_op;
@@ -151,9 +153,15 @@ scan: SCAN_FUNCTION_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncC
 increment: expr_var INCREMENT_TOKEN {$$ = makeIncrementCmd($1, $2, NULL);}
          | expr_var INCREMENT_TOKEN expr {$$ = makeIncrementCmd($1, $2, $3);}
 
-expr: OPENPAR_TOKEN expr CLOSEPAR_TOKEN {$$ = $2;}
-    | expr_token
-    | expr binary_op expr_token {$$ = ast_operation($2, $1, $3);}
+expr: mul_expr
+    | add_expr
+    | OPENPAR_TOKEN expr CLOSEPAR_TOKEN {$$ = $2;}
+    
+mul_expr: expr_token
+        | mul_expr MUL_TOKEN expr_token {$$ = ast_operation($2, $1, $3);} 
+    
+add_expr: mul_expr
+        | mul_expr binary_op add_expr {$$ = ast_operation($2, $1, $3);} 
 
 
 expr_token: BOOL_TOKEN { $$ = ast_bool($1);}
@@ -162,8 +170,7 @@ expr_token: BOOL_TOKEN { $$ = ast_bool($1);}
 
 binary_op: REL_TOKEN
          | BINARY_REL_TOKEN   
-         | ADD_TOKEN
-         | MUL_TOKEN      
+         | ADD_TOKEN      
 
 expr_var: VAR_TOKEN { $$ = ast_variable($1);}
 
