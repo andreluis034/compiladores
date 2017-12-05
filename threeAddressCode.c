@@ -23,7 +23,7 @@ void initializeRegisters()
 	{
 		registers[i].registerName = registerNames[i];
 		registers[i].registerNumber = i;
-		registers[i].used = 0;
+		registers[i].used = (i <= 7) ? 1 : 0;
 		registers[i].variableRepresented = NULL;
 	}
 }
