@@ -104,29 +104,59 @@ InstList* compileCmdList(CmdList* cmdlist)
 		C_FOR,
 		C_FUNC_CALL,
 		C_FUNC*/
+
+Pair* loadVariable(Expr* expr) 
+{
+	InstList* lw = EMPTY_LIST;
+	InstSymbol* is = getNextSymbol() ;
+	Inst* inst = makeInstruction(LOAD_VARIABLE, is, makeInstSymbolStr(expr->attr.variable), NULL);
+	lw = prependInst(lw, inst);
+	return makePair(is, lw);
+}
 InstList* compileCommand(Cmd* cmd) 
 {
 	InstList* instructionList = EMPTY_LIST;
 	Pair* compiledExpr;
+	Pair* var;
+	
 	InstSymbol* symbol;
 	Inst* compiledInst;
 	InstSymbol* exitif;
+	char op[2];
 	switch(cmd->kind) 
 	{
 		case C_DECLARATION:
 			compiledExpr = makePairExpr(cmd->attr.declaration.expr);
 			instructionList = compiledExpr->instructionList;
 			instructionList = appendInst(instructionList, 
-				makeInstruction(MOV, makeInstSymbolStr(cmd->attr.declaration.variable), 
+				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
 			break;
 		case C_INCREMENT:
+			var = makePairExpr(cmd->attr.increment.variable);
+			//compiledExpr = makePairExpr(cmd->attr.increment.)
+			if(strcmp(cmd->attr.increment.operator, "++") == 0 || strcmp(cmd->attr.increment.operator, "--") == 0) 
+			{
+				compiledExpr = makePairInt(1, NULL);
+			}
+			else 
+			{
+				compiledExpr = makePairExpr(cmd->attr.increment.expr);
+			}
+			op[0] = cmd->attr.increment.operator[0];
+			op[1] = 0;
+ 			compiledExpr = CompileExpression(op, var, compiledExpr);
+			instructionList = compiledExpr->instructionList;
+			instructionList = appendInst(instructionList, 
+				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
+				compiledExpr->symbol, NULL));
+
 			//appendInst(makeInstruction(ADD,))
 			break;
 		case C_FOR:
 			//inst inicial
-			compiledInst = compileCommand(cmd->attr.forCmd.initial);
-			instructionList = appendInst(instructionList,compiledInst);
+			instructionList = compileCommand(cmd->attr.forCmd.initial);
+			//instructionList = appendInst(instructionList,compiledInst);
 			//LABEL
 			symbol = getLabel();
 			instructionList = appendInst(instructionList,makeInstruction(LABEL,symbol,NULL,NULL));
@@ -137,10 +167,9 @@ InstList* compileCommand(Cmd* cmd)
 			exitif = getLabel();
 			instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, exitif, NULL));
 			//CMDLIST
-			instructionList = concatList(instructionList,compileCmdList(cmd->attr.forCmd.body));
+			instructionList = concatInst(instructionList,compileCmdList(cmd->attr.forCmd.body));
 			//INST
-			compiledInst = compileCommand(cmd->attr.forCmd.afterIteration);
-			instructionList = appendInst(instructionList,compiledInst);
+			instructionList = concatInst(instructionList,compileCommand(cmd->attr.forCmd.afterIteration));
 			//GOTO LABEL
 			instructionList = appendInst(instructionList,makeInstruction(GOTO,symbol,NULL,NULL));
 			//LABEL1
@@ -168,6 +197,8 @@ InstList* compileCommand(Cmd* cmd)
 	return instructionList;
 }
 
+
+
 /*		E_INTEGER,
 		E_OPERATION,
 		E_VARIABLE,*/
@@ -181,7 +212,7 @@ Pair* makePairExpr(Expr* expr)
 		case E_INTEGER:
 			return makePairInt(expr->attr.value, NULL);
 		case E_VARIABLE: 
-			return makePairStr(expr->attr.variable, NULL);
+			return loadVariable(expr);// makePairStr(expr->attr.variable, NULL);
 		case E_OPERATION: 
 			p1 = makePairExpr(expr->attr.op.left);
 			p2 = makePairExpr(expr->attr.op.right);
