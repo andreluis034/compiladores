@@ -4,8 +4,10 @@
 #include "threeAddressCode.h"
 #define GET_T (tCount++)
 #define GET_LABEL (labelCount++)
+#define REGISTER_COUNT 26
 unsigned int tCount = 0;
 unsigned int labelCount = 0;
+unsigned char registerUsed[REGISTER_COUNT] =  {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 makeTypeList(InstList*, makeInstList, Inst*)
 appendType(InstList*, appendInst, Inst*)
@@ -27,11 +29,35 @@ InstSymbol* makeInstSymbolInt(int integer)
 	i->symbol.number = integer;
 	return i;
 }
-
+int getUnsusedRegister() {
+	int i;
+	for(i = 0; i < REGISTER_COUNT; ++i)
+	{
+		if(registerUsed[i] == 0)
+			return i;
+	}
+	return -1;
+}
+void freeRegister(InstSymbol* symb) 
+{
+	if(symb->type == S_INT) 
+	{
+		printf("#TRYING TO FREE CONSTANT");
+		exit(-1);
+		return;
+	}
+	int i = atoi(symb->symbol.str);
+	registerUsed[i] = 0;
+}
 InstSymbol* getNextSymbol() 
 {
+	int reg = getUnsusedRegister();
+	if(reg == -1) {
+		printf("#COULD NOT GET ENOUGH REGISTERS");
+		exit(-1);
+	}
 	char* totallySafeBuffer = (char*) malloc(13);
-	snprintf(totallySafeBuffer, 13, "t%d", GET_T);
+	snprintf(totallySafeBuffer, 13, "$%d", reg);
 	return makeInstSymbolStr(totallySafeBuffer);
 }
 InstSymbol* getLabel() 
@@ -77,6 +103,8 @@ Inst* makeInstruction(InstType type, InstSymbol* s1, InstSymbol* s2, InstSymbol*
 //NAKANAIDE IMA WA
 Pair* CompileExpression(char* operator, Pair* left, Pair* right) 
 {
+	freeRegister(&left->symbol[1]);
+	freeRegister(&right->symbol[1]);
 	InstSymbol* nextSymbol = getNextSymbol();//TODO: use one of the expressions
 	InstList* requiredInstructions = concatInst(left->instructionList, right->instructionList); 
 	COMPILE_OPERATOR(if, "*", MUL)
@@ -137,6 +165,7 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList, 
 				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
+			freeRegister(compiledExpr->symbol);
 			break;
 		case C_INCREMENT:
 			var = makePairExpr(cmd->attr.increment.variable);
@@ -156,6 +185,7 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList, 
 				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
+			freeRegister(compiledExpr->symbol);
 
 			//appendInst(makeInstruction(ADD,))
 			break;
@@ -172,6 +202,7 @@ InstList* compileCommand(Cmd* cmd)
 			//BRANCH_EQ_ZERO
 			exitif = getLabel();
 			instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, exitif, NULL));
+			freeRegister(compiledExpr->symbol);
 			//CMDLIST
 			instructionList = concatInst(instructionList,compileCmdList(cmd->attr.forCmd.body));
 			//INST
@@ -182,15 +213,21 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList,makeInstruction(LABEL,exitif,NULL,NULL));
 			break;
 		case C_IF_ELSE: 
+			//Compile expression
 			compiledExpr = makePairExpr(cmd->attr.ifelse.condition);
 			instructionList = compiledExpr->instructionList;
 			symbol = getLabel();
 			exitif = getLabel();
+			//TEST
 			instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, symbol, NULL));
+			freeRegister(compiledExpr->symbol);
+			//IFTRUE
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iftrue));
-			instructionList = appendInst(instructionList, makeInstruction(GOTO, exitif, NULL, NULL));
+			instructionList = appendInst(instructionList, makeInstruction(GOTO, exitif, NULL, NULL)); //EXIT
+			//IFFALSE
 			instructionList = appendInst(instructionList, makeInstruction(LABEL, symbol, NULL, NULL));
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iffalse));
+			//FINISH
 			instructionList = appendInst(instructionList, makeInstruction(LABEL, exitif, NULL, NULL));
 			break;
 		case C_FUNC: //TODO arguments
