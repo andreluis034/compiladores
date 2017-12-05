@@ -5,5 +5,7 @@ package main
 import "fmt"
 
 func main(d,e) {
-	total:=3*5+2*5;
+	a:=68;
+	b:=1;
+	total:=a+b;
 }
