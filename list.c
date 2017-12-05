@@ -27,7 +27,7 @@ List* makeInt(int Value)
 List* concatList(List* l1, List* l2) 
 {
     if(IS_EMPTY_LIST(l1))
-        return EMPTY_LIST;
+        return makeCopy(l2);
     List* copy1 = makeCopy(l1);
     List* start1 = copy1;
     while(copy1->Next != NULL)

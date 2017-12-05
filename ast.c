@@ -62,7 +62,7 @@ void print_variable(Expr* expr, int level, int lastChild)
 }
 void print_operation(Expr* expr, int level, int lastChild)
 {
-	printPadding(level, 0);
+	printPadding(level, lastChild);
 	printf("E_OPERATION\n");
 	printExpr(expr->attr.op.left, level + 1, 0);
 	printKeyValue("OPERATOR: ", expr->attr.op.operator, level + 1, 0);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "parser.h"
-
+#include "mips.h"
+#include "threeAddressCode.h"
 int main(int argc, char** argv) {
     --argc; ++argv;
     if (argc != 0) {
@@ -12,7 +13,8 @@ int main(int argc, char** argv) {
     } //  yyin = stdin
     root == NULL;
     if (yyparse() == 0) {
-      printCmdList(root,0,1);
+      //printCmdList(root,0,1);
+      compileToMips(compileCmdList(root));
       // printf("Result = %d\n", eval(root));
     }
     return 0;
