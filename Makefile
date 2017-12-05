@@ -1,5 +1,5 @@
 
-OBJS=scanner.o parser.o compiler.o ast.o list.o cmd.o utility.o threeAddressCode.o mips.o
+OBJS=scanner.o parser.o compiler.o ast.o list.o cmd.o utility.o threeAddressCode.o mips.o hashtable.o scope.o
 INTERM=scanner.c parser.c parser.h
 PROGRAM=./compiler
 CFLAGS=-g 
