@@ -79,7 +79,7 @@ void compileSingleInstruction(Inst* instruction)
         case GOTO:
             printf("j %s\n",SYMBOL_STR(1));
         break;
-        case RETURN:
+        case RETURN://TODO return values
             printf("jr $ra\n");
         break;
     }
