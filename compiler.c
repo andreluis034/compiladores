@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
       }
     } //  yyin = stdin
     root == NULL;
+    initializeRegisters();
     if (yyparse() == 0) {
       //printCmdList(root,0,1);
       compileToMips(compileCmdList(root));
