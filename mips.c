@@ -20,21 +20,21 @@ void printSimpleOperation(Inst* instruction, char* addorsub){
     if(addorsub[0]=='a' || addorsub[0]=='s'){
         if(SYMBOL_IS_INT(2) && SYMBOL_IS_INT(3))
         {
-            printf("li %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
-            printf("%si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(1),SYMBOL_INT(3));
+            printf("    li %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
+            printf("    %si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(1),SYMBOL_INT(3));
         }
         else
         {
             if(SYMBOL_IS_STR(2) && SYMBOL_IS_INT(3)){
-                printf("%si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_INT(3));
+                printf("    %si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_INT(3));
             }
             
             else if (SYMBOL_IS_INT(2) && SYMBOL_IS_STR(3))
             {
-                printf("%si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(3),SYMBOL_INT(2));
+                printf("    %si %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(3),SYMBOL_INT(2));
             }
             else{
-                printf("%s %s %s %s\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
+                printf("    %s %s %s %s\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
             }
         }  
     }
@@ -42,21 +42,21 @@ void printSimpleOperation(Inst* instruction, char* addorsub){
     if(addorsub[0]=='m' || addorsub[0]=='d'){
         if(SYMBOL_IS_INT(2) && SYMBOL_IS_INT(3))
         {
-            printf("li %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
-            printf("%s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(1),SYMBOL_INT(3));
+            printf("    li %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
+            printf("    %s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(1),SYMBOL_INT(3));
         }
         else
         {
             if(SYMBOL_IS_STR(2) && SYMBOL_IS_INT(3)){
-                printf("%s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_INT(3));
+                printf("    %s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_INT(3));
             }
             
             else if (SYMBOL_IS_INT(2) && SYMBOL_IS_STR(3))
             {
-                printf("%s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(3),SYMBOL_INT(2));
+                printf("    %s %s %s %d\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(3),SYMBOL_INT(2));
             }
             else{
-                printf("%s %s %s %s\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
+                printf("    %s %s %s %s\n",addorsub,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
             }
         }  
     }
@@ -86,10 +86,16 @@ void compileSingleInstruction(Inst* instruction)
         printSimpleOperation(instruction,"div");
         break;
         case GOTO:
-        printf("j %s\n",SYMBOL_STR(1));
+        printf("    j %s\n",SYMBOL_STR(1));
         break;
         case RETURN://TODO return values
-        printf("jr $ra\n");
+        printf("    jr $ra\n");
+        break;
+        case BRANCH_EQ_ZERO:
+        printf("    beq %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
+        break;
+        case BRANCH_NOT_EQ_ZERO:
+        printf("    bneq %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
         break;
     }
 }
@@ -97,9 +103,14 @@ void compileSingleInstruction(Inst* instruction)
 void compileToMips(InstList* instructionList) 
 {
     printf(".text\n");
-    printf("jal main\n");
-    printf("li $v0, 10\n");
-    printf("syscall\n");
+    //print function
+    //printf("PRINT:\n");
+    //scan function
+    //printf("SCAN:\n");
+    //main starts here
+    printf("    jal main\n");
+    printf("    li $v0, 10\n");
+    printf("    syscall\n");
     while(instructionList != NULL) 
     {
         Inst* inst = (Inst*) instructionList->Value.pointer;

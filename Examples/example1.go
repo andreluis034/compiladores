@@ -5,5 +5,13 @@ package main
 import "fmt"
 
 func main(d,e) {
-	linda_variavel:=1*69+0+2-2;
+	linda_variavel:=2;
+	if(linda_variavel==2){
+		cenas:=3;
+		ola:=2;
+		adeus:=1;
+	}
+	else{
+		cenas:=42;
+	}
 }
