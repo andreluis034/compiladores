@@ -102,7 +102,16 @@ void compileSingleInstruction(Inst* instruction)
 
 void getVariables(CmdList* cmdlist)
 {
-    
+    while(cmdlist != NULL)
+    {
+        if(getCmd(cmdlist)->kind == C_DECLARATION){
+            printf("OLA AMOLE %s\n\n\n",(getCmd(cmdlist))->attr.declaration.variable->attr.variable);
+        }
+
+        printf("ola\n");
+
+        cmdlist = cmdlist->Next;
+    }
 }
 
 void compileToMips(InstList* instructionList, CmdList* cmdlist) 
