@@ -100,8 +100,14 @@ void compileSingleInstruction(Inst* instruction)
     }
 }
 
-void compileToMips(InstList* instructionList) 
+void getVariables(CmdList* cmdlist)
 {
+    
+}
+
+void compileToMips(InstList* instructionList, CmdList* cmdlist) 
+{
+    getVariables(cmdlist);
     printf(".text\n");
     //print function
     //printf("PRINT:\n");

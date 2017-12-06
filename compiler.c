@@ -14,8 +14,10 @@ int main(int argc, char** argv) {
     root == NULL;
     initializeRegisters();
     if (yyparse() == 0) {
-      //printCmdList(root,0,1);
-      compileToMips(compileCmdList(root));
+      
+      //compileToMips(compileCmdList(root),root);
+      //compileCmdList(root);
+      printCmdList(root,0,1);
       // printf("Result = %d\n", eval(root));
     }
     return 0;
