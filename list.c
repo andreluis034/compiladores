@@ -66,8 +66,6 @@ List* prependToList(List* list, void* value)
     List* list2 = makeList(value);
     if(IS_EMPTY_LIST(list))
     {
-        if(value == NULL)
-            return NULL;
         return list2;
     }
     list2->Next = list;

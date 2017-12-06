@@ -224,38 +224,39 @@ InstList* compileCommand(Cmd* cmd)
 	char op[2];
 	switch(cmd->kind) 
 	{
-		case C_DECLARATION:
-		compiledExpr = makePairExpr(cmd->attr.declaration.expr);
-		instructionList = compiledExpr->instructionList;
-		instructionList = appendInst(instructionList, 
-			makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
-			compiledExpr->symbol, NULL));
-			if(compiledExpr->symbol->type == S_STR)
-			freeRegister(compiledExpr->symbol);
-			break;
-			case C_INCREMENT:
-			var = makePairExpr(cmd->attr.increment.variable);
-			//compiledExpr = makePairExpr(cmd->attr.increment.)
-			if(strcmp(cmd->attr.increment.operator, "++") == 0 || strcmp(cmd->attr.increment.operator, "--") == 0) 
-			{
-				compiledExpr = makePairInt(1, NULL);
-			}
-			else 
-			{
-				compiledExpr = makePairExpr(cmd->attr.increment.expr);
-			}
-			op[0] = cmd->attr.increment.operator[0];
-			op[1] = 0;
-			compiledExpr = CompileExpression(op, var, compiledExpr);
-			instructionList = compiledExpr->instructionList;
-			instructionList = appendInst(instructionList, 
+				case C_DECLARATION:
+				compiledExpr = makePairExpr(cmd->attr.declaration.expr);
+				instructionList = compiledExpr->instructionList;
+				instructionList = appendInst(instructionList, 
 				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
 				if(compiledExpr->symbol->type == S_STR)
 				freeRegister(compiledExpr->symbol);
-				
+				break;
+
+				case C_INCREMENT:
+				var = makePairExpr(cmd->attr.increment.variable);
+				//compiledExpr = makePairExpr(cmd->attr.increment.)
+				if(strcmp(cmd->attr.increment.operator, "++") == 0 || strcmp(cmd->attr.increment.operator, "--") == 0) 
+				{
+					compiledExpr = makePairInt(1, NULL);
+				}
+				else 
+				{
+					compiledExpr = makePairExpr(cmd->attr.increment.expr);
+				}
+				op[0] = cmd->attr.increment.operator[0];
+				op[1] = 0;
+				compiledExpr = CompileExpression(op, var, compiledExpr);
+				instructionList = compiledExpr->instructionList;
+				instructionList = appendInst(instructionList, 
+				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
+				compiledExpr->symbol, NULL));
+				if(compiledExpr->symbol->type == S_STR)
+				freeRegister(compiledExpr->symbol);		
 				//appendInst(makeInstruction(ADD,))
 				break;
+
 				case C_FOR:
 				//inst inicial
 				instructionList = compileCommand(cmd->attr.forCmd.initial);
@@ -279,6 +280,7 @@ InstList* compileCommand(Cmd* cmd)
 				//LABEL1
 				instructionList = appendInst(instructionList,makeInstruction(LABEL,exitif,NULL,NULL));
 				break;
+
 				case C_IF_ELSE: 
 				//Compile expression
 				compiledExpr = makePairExpr(cmd->attr.ifelse.condition);
@@ -297,6 +299,7 @@ InstList* compileCommand(Cmd* cmd)
 				//FINISH
 				instructionList = appendInst(instructionList, makeInstruction(LABEL, exitif, NULL, NULL));
 				break;
+				
 				case C_FUNC: //TODO arguments
 				compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
 				instructionList = compileCmdList(cmd->attr.func.commandList);
