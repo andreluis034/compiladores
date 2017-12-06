@@ -37,8 +37,9 @@ int existsVariable(VariableList* list, char* toFind){
 }
 
 void printVariableList(VariableList* list){
+    printf(".data\n");
     while(list!=NULL){
-        printf("%s\n",getVariable(list));
+        printf("%s: .word\n",getVariable(list));
         list = list->Next;
     }
 }
@@ -137,7 +138,7 @@ void checkDeclaration(Cmd* cmd)
     if(existsVariable(globalVariables,cmd->attr.declaration.variable->attr.variable)){
     }
     else{
-        appendVariable(globalVariables,cmd->attr.declaration.variable->attr.variable);
+        globalVariables = appendVariable(globalVariables,cmd->attr.declaration.variable->attr.variable);
     }
     
 }
@@ -180,7 +181,7 @@ void checkFunc(Cmd* cmd)
 
     while(argList != NULL)
     {
-        appendVariable(globalVariables,getExpr(argList)->attr.variable);
+        globalVariables = appendVariable(globalVariables,getExpr(argList)->attr.variable);
         //printf("%s\n",getExpr(argList)->attr.variable);
         argList = argList->Next;
     }
@@ -227,10 +228,9 @@ void checkCmdList(CmdList* cmdlist)
 
 void compileToMips(InstList* instructionList, CmdList* cmdlist) 
 {
-    globalVariables = makeVariableList("IGNORAR ESTA MERDA");
+    globalVariables = NULL;
     checkCmdList(cmdlist);
     printVariableList(globalVariables);
-    /*
     printf(".text\n");
     //print function
     //printf("PRINT:\n");
@@ -246,5 +246,5 @@ void compileToMips(InstList* instructionList, CmdList* cmdlist)
         compileSingleInstruction(inst);
         instructionList = instructionList->Next;
     }
-    */
+    
 }
