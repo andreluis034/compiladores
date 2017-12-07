@@ -225,13 +225,13 @@ InstList* compileCommand(Cmd* cmd)
 	switch(cmd->kind) 
 	{
 				case C_DECLARATION:
-				compiledExpr = makePairExpr(cmd->attr.declaration.expr);
-				instructionList = compiledExpr->instructionList;
-				instructionList = appendInst(instructionList, 
-				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
-				compiledExpr->symbol, NULL));
-				if(compiledExpr->symbol->type == S_STR)
-				freeRegister(compiledExpr->symbol);
+					compiledExpr = makePairExpr(cmd->attr.declaration.expr);
+					instructionList = compiledExpr->instructionList;
+					instructionList = appendInst(instructionList, 
+					makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
+					compiledExpr->symbol, NULL));
+					if(compiledExpr->symbol->type == S_STR)
+						freeRegister(compiledExpr->symbol);
 				break;
 
 				case C_INCREMENT:

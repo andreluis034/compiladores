@@ -129,29 +129,27 @@ void compileSingleInstruction(Inst* instruction)
     }
 }
 
-
-
-
 void checkDeclaration(Cmd* cmd)  
 {   
     //printf("%s\n",cmd->attr.declaration.variable->attr.variable);
-    if(existsVariable(globalVariables,cmd->attr.declaration.variable->attr.variable)){
-    }
-    else{
+    if(existsVariable(globalVariables,cmd->attr.declaration.variable->attr.variable) == 0) {
         globalVariables = appendVariable(globalVariables,cmd->attr.declaration.variable->attr.variable);
     }
     
 }
 
 
-void checkIfElse(Cmd* cmd)  
+VariableList* checkIfElse(Cmd* cmd, VariableList* varlist)
 {
     int lastChild = IS_EMPTY_LIST( cmd->attr.ifelse.iffalse );
-    checkCmdList(cmd->attr.ifelse.iftrue);
+    VariableList* s = checkCmdList(cmd->attr.ifelse.iftrue, varlist);
+    s = concatList(varlist, s);
     if(!lastChild)
     {
-        checkCmdList(cmd->attr.ifelse.iffalse);
+        VariableList* s2 = checkCmdList(cmd->attr.ifelse.iffalse, varlist);
+        s = concatList(s, s2);
     }
+    return s;
 }
 
 void checkFor(Cmd* cmd) 
@@ -189,33 +187,30 @@ void checkFunc(Cmd* cmd)
     checkCmdList(cmd->attr.func.commandList);
 }
 
-void checkCmd(Cmd* cmd)  
+VariableList checkCmd(Cmd* cmd, VariableList* varlist)  
 {
     switch(cmd->kind)
     {
         case C_FUNC: 
-            checkFunc(cmd);
-        break;
+            return checkFunc(cmd, varlist);
 
         case C_IF_ELSE:
-            checkIfElse(cmd);
-        break;
+            return checkIfElse(cmd, varlist);
 
         case C_FOR:
-            checkFor(cmd);
-        break;
+            return checkFor(cmd, varlist);
 
         case C_DECLARATION:
-            checkDeclaration(cmd);
-        break;
+            return checkDeclaration(cmd, varlist);
     }
+    return EMPTY_LIST;
 }
 
-void checkCmdList(CmdList* cmdlist)
+VariableList* checkCmdList(CmdList* cmdlist, VariableList* varlist)
 {
     while(cmdlist != NULL)
     {
-        checkCmd(getCmd(cmdlist));
+        checkCmd(getCmd(cmdlist), varlist);
         cmdlist = cmdlist->Next;
     }
 }
@@ -229,7 +224,7 @@ void checkCmdList(CmdList* cmdlist)
 void compileToMips(InstList* instructionList, CmdList* cmdlist) 
 {
     globalVariables = NULL;
-    checkCmdList(cmdlist);
+    checkCmdList(cmdlist, globalVariables);
     printVariableList(globalVariables);
     printf(".text\n");
     //print function
