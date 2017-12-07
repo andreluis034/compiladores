@@ -91,6 +91,13 @@ Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist)
         }
         arglist = arglist->Next;
     }
+    VariableList* varlist = checkCmdList(cmdlist);
+    while(varlist != NULL)
+    {
+        addVariable(node->attr.func.scope, getVariable(varlist), stack, 0);
+        varlist = varlist->Next;
+    }
+    //printVariableList(cmdlist);
     return node;
 }
 
