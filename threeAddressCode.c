@@ -64,6 +64,7 @@ int getFreeRegister()
 	registers[i].used = 1;
 	return ret;
 }
+
 int getFreeRegisterForVariable(char* varName, int* reused) {
 	int i;
 	int ret = -1;
