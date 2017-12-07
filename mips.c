@@ -84,17 +84,14 @@ void printStore(Inst* instruction){
         printf("    sw $v1 %d(%s)\n", SYMBOL_INT(3), SYMBOL_STR(2));
     }
 
-    //printf("    la %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
 }
 
 void printCompare(Inst* instruction, char* comparation){
 
-    //printf("        TESTING... %s %d %d\n",SYMBOL_STR(1),SYMBOL_INT(2),SYMBOL_INT(3));
 
     if(SYMBOL_IS_STR(2) && SYMBOL_IS_STR(3))
     {
         printf("    %s %s %s %s\n",comparation,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
-        //printf("teste: %s %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
     }
 
     else if(SYMBOL_IS_STR(2) && SYMBOL_IS_INT(3))
@@ -109,13 +106,10 @@ void printCompare(Inst* instruction, char* comparation){
     }
 
     else{
-        //two ints, gotta load one into temp reg
         printf("    li $t9 %d\n",SYMBOL_INT(2));
         printf("    li $t8 %d\n",SYMBOL_INT(3));
         printf("    %s %s $t8 $t9\n",comparation,SYMBOL_STR(1));
     }
-
-    //printf("cenas: %s %d %d\n",SYMBOL_STR(1),SYMBOL_INT(2),SYMBOL_INT(3));
     
 }
 
@@ -183,7 +177,12 @@ void compileSingleInstruction(Inst* instruction)
         case LOAD_ADDRESS:
             printf("    la %s %s\n", SYMBOL_STR(1), SYMBOL_STR(2));
         break;
-
+        case LOAD_ARGUMENT_REGISTER:
+            printf("    la %s 0(%s)\n", SYMBOL_STR(1),SYMBOL_STR(2));
+        break;
+        case FUNC_CALL:
+            printf("    jal %s\n", SYMBOL_STR(1));
+        break;
     }
 }
 
@@ -193,11 +192,8 @@ void compileToMips(InstList* instructionList, CmdList* cmdlist)
     //globalVariables = NULL;
     VariableList* varlist = checkCmdList(cmdlist);
     printVariableList(varlist);
-    printf(".text\n");
-    //print function
-    //printf("PRINT:\n");
-    //scan function
-    //printf("SCAN:\n");
+    printf("\n.text\n");
+    //for now print and scan one arg
     //main starts here
     printf("    jal main\n");
     printf("    li $v0, 10\n");
@@ -208,5 +204,15 @@ void compileToMips(InstList* instructionList, CmdList* cmdlist)
         compileSingleInstruction(inst);
         instructionList = instructionList->Next;
     }
+
+    printf("\nfmt.scan:\n");
+    printf("    li $v0 5\n");
+    printf("    syscall\n");
+    printf("    sw $v0 0($a0)\n");
+    printf("    jr $ra\n");
+    printf("\nfmt.print:\n");
+    printf("    li $v0 1\n");
+    printf("    syscall\n");
+    printf("    jr $ra\n\n");
     
 }

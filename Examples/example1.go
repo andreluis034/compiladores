@@ -5,11 +5,7 @@ package main
 import "fmt"
 
 func main() {
-
-	c:=true;
-	d:=false;
-
-	if(c || d){
-		e:=3;
-	}
+	a:=2;
+	fmt.Scan(a);
+	fmt.Print(a);
 }
