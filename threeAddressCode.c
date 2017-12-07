@@ -356,7 +356,7 @@ InstList* compileCommand(Cmd* cmd)
 		case C_FUNC_CALL:
 			//TODO save used registers
 			symbol = getNextSymbol(getFreeRegister());
-			if(strcmp(cmd->attr.funcCall.funcName, "fmt.Scan") == 0) 
+			if(strcmp(cmd->attr.funcCall.funcName, "fmt.scan") == 0) 
 			{
 				compiledInst = makeInstruction(LOAD_ADDRESS, symbol, makeInstSymbolStr(getExpr(cmd->attr.funcCall.variables)->attr.variable), NULL);
 				instructionList = appendInst(instructionList, compiledInst);
