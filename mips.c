@@ -114,7 +114,8 @@ void printStore(Inst* instruction){
 
 void compileSingleInstruction(Inst* instruction)
 {
-    
+    if(instruction == NULL)
+        return;
     
     switch(instruction->type)
     {
