@@ -5,6 +5,7 @@
 #define GET_T (tCount++)
 #define GET_LABEL (labelCount++)
 #define REGISTER_COUNT 24
+#define ARG_REGISTER_START 4
 unsigned int tCount = 0;
 unsigned int labelCount = 0;
 Register registers[REGISTER_COUNT] =  {0};
@@ -198,26 +199,33 @@ InstList* compileCmdList(CmdList* cmdlist)
 	
 }
 
-Pair* loadVariable(Expr* expr) 
+Pair* loadVariable(char* varName) 
 {
 	int reuse = 0;
 	Inst* inst = NULL;
 	InstList* lw = EMPTY_LIST;
-	int reg = getFreeRegisterForVariable(expr->attr.variable, &reuse);
+	int reg = getFreeRegisterForVariable(varName, &reuse);
 	InstSymbol* is = getNextSymbol(reg);
 	if(reuse == 0) 
 	{
-		inst = makeInstruction(LOAD_VARIABLE, is, makeInstSymbolStr(expr->attr.variable), NULL);
+		inst = makeInstruction(LOAD_VARIABLE, is, makeInstSymbolStr(varName), NULL);
 	}
 	lw = prependInst(lw, inst);
 	return makePair(is, lw);
 }
+
+Pair* loadVariableAddress(char* varName)
+{
+
+} 
+
 InstList* compileCommand(Cmd* cmd) 
 {
+	ExprList* exprlist;
 	InstList* instructionList = EMPTY_LIST;
 	Pair* compiledExpr;
 	Pair* var;
-	
+	int regCount = 0;
 	InstSymbol* symbol;
 	Inst* compiledInst;
 	InstSymbol* exitif;
@@ -307,33 +315,67 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
 			//TODO jal?
 		break;
+		case C_FUNC_CALL:
+			//TODO save used registers
+			symbol = getNextSymbol(getFreeRegister());
+			if(strcmp(cmd->attr.funcCall.funcName, "fmt.Scan") == 0) 
+			{
+				compiledInst = makeInstruction(LOAD_ADDRESS, symbol, makeInstSymbolStr(getExpr(cmd->attr.funcCall.variables)->attr.variable), NULL);
+				instructionList = appendInst(instructionList, compiledInst);
+				compiledInst = makeInstruction(LOAD_ARGUMENT_REGISTER, makeInstSymbolStr("$a0"), symbol, NULL);
+				instructionList = appendInst(instructionList, compiledInst);
+				freeRegister(symbol);
+			}
+			else 
+			{
+				exprlist = cmd->attr.funcCall.variables;
+				while(exprlist != NULL) {
+					compiledExpr = makePairExpr(getExpr(exprlist));
+					if(regCount < ARG_REGISTER_COUNT)
+					{
+						compiledInst = makeInstruction(LOAD_ARGUMENT_REGISTER, getNextSymbol(regCount + ARG_REGISTER_START), compiledExpr->symbol, NULL);
+						regCount++;
+					}
+					else
+					{
+						compiledInst = makeInstruction(LOAD_ARGUMENT_STACK, compiledExpr->symbol, NULL, NULL);
+					}
+					instructionList = appendInst(compiledExpr->instructionList, compiledInst);
+					freeRegister(compiledExpr->symbol);
+					exprlist = exprlist->Next;
+				}
+			}
+			compiledInst = makeInstruction(FUNC_CALL, makeInstSymbolStr(cmd->attr.funcCall.funcName), NULL, NULL );
+			instructionList = appendInst(instructionList, compiledInst);
+			
+		break;
 	}
 	return instructionList;
 }
 		
 		
 		
-		/*		E_INTEGER,
-		E_OPERATION,
-		E_VARIABLE,*/
-		Pair* makePairExpr(Expr* expr) 
-		{
-			Pair* p1;
-			Pair* p2;
-			switch(expr->kind) 
-			{
-				case E_BOOL:
-				case E_INTEGER:
-				return makePairInt(expr->attr.value, NULL);
-				case E_VARIABLE: 
-				return loadVariable(expr);// makePairStr(expr->attr.variable, NULL);
-				case E_OPERATION: 
-				p1 = makePairExpr(expr->attr.op.left);
-				p2 = makePairExpr(expr->attr.op.right);
-				return CompileExpression(expr->attr.op.operator, p1, p2);
-				default:
-				printf("YOU FORGOT SOMETHING IDIOT type: %d\n", expr->kind); //TODO REMOVE
-				return NULL;
-			}	
-			return NULL;
-		}
+/*      E_INTEGER,
+E_OPERATION,
+E_VARIABLE,*/
+Pair* makePairExpr(Expr* expr) 
+{
+    Pair* p1;
+    Pair* p2;
+    switch(expr->kind) 
+    {
+        case E_BOOL:
+        case E_INTEGER:
+        return makePairInt(expr->attr.value, NULL);
+        case E_VARIABLE: 
+        return loadVariable(expr->attr.variable);// makePairStr(expr->attr.variable, NULL);
+        case E_OPERATION: 
+        p1 = makePairExpr(expr->attr.op.left);
+        p2 = makePairExpr(expr->attr.op.right);
+        return CompileExpression(expr->attr.op.operator, p1, p2);
+        default:
+        printf("YOU FORGOT SOMETHING IDIOT type: %d\n", expr->kind); //TODO REMOVE
+        return NULL;
+    }   
+    return NULL;
+}
