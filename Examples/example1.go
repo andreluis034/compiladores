@@ -4,9 +4,12 @@ package main
 
 import "fmt"
 
-func main(d,e) {
-	lindavariavel:=2+2;
-	lindavariavel:=2+2;
-	lindavariavel:=2+2;
-	lindavariavel:=2+2;
+func main() {
+
+	c:=true;
+	d:=false;
+
+	if(c || d){
+		e:=3;
+	}
 }
