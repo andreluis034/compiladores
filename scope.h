@@ -27,4 +27,4 @@ typedef struct _variable Variable;
 
 Scope* createScope();
 void addVariable(Scope* s, char* varName, VariableLocation varLocation, int registerNumber);
-Variable* getVariable(Scope* s, char* varName);
+Variable* getVariableScope(Scope* s, char* varName);

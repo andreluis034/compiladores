@@ -29,7 +29,7 @@ void addVariable(Scope* s, char* varName, VariableLocation varLocation, int regi
     addKeyValue(s->hashmap, varName, v);
 }
 
-Variable* getVariable(Scope* s, char* varName)
+Variable* getVariableScope(Scope* s, char* varName)
 {
     Variable* v = (Variable*)getKeyValue(s->hashmap, varName);
     if(v == NULL && s->parent != NULL)
