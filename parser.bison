@@ -170,7 +170,8 @@ expr_token: BOOL_TOKEN { $$ = ast_bool($1);}
 
 binary_op: REL_TOKEN
          | BINARY_REL_TOKEN   
-         | ADD_TOKEN      
+         | ADD_TOKEN    
+         | BINARY_TOKEN  
 
 expr_var: VAR_TOKEN { $$ = ast_variable($1);}
 

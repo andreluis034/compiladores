@@ -39,7 +39,7 @@ int existsVariable(VariableList* list, char* toFind){
 void printVariableList(VariableList* list){
     printf(".data\n");
     while(list!=NULL){
-        printf("%s: .word\n",getVariable(list));
+        printf("%s: .word 0\n",getVariable(list));
         list = list->Next;
     }
 }
@@ -100,16 +100,48 @@ void printStore(Inst* instruction){
     //SYMBOL 2: 2 resultado
 
     if(SYMBOL_IS_STR(2)){
-        printf("    la $at %s\n",SYMBOL_STR(1));
-        printf("    sw %s 0($at)\n",SYMBOL_STR(2));
+        printf("    la $t8 %s\n",SYMBOL_STR(1));
+        printf("    sw %s 0($t8)\n",SYMBOL_STR(2));
     }
     else{
-        printf("    la $at %s\n",SYMBOL_STR(1));
-        printf("    li $v1 %d\n",SYMBOL_INT(2));
-        printf("    sw $v1 0($at)\n");
+        printf("    la $t8 %s\n",SYMBOL_STR(1));
+        printf("    li $t9 %d\n",SYMBOL_INT(2));
+        printf("    sw $t9 0($t8)\n");
     }
 
     //printf("    la %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
+}
+
+void printCompare(Inst* instruction, char* comparation){
+
+    //printf("        TESTING... %s %d %d\n",SYMBOL_STR(1),SYMBOL_INT(2),SYMBOL_INT(3));
+
+    if(SYMBOL_IS_STR(2) && SYMBOL_IS_STR(3))
+    {
+        printf("    %s %s %s %s\n",comparation,SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
+        //printf("teste: %s %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2),SYMBOL_STR(3));
+    }
+
+    else if(SYMBOL_IS_STR(2) && SYMBOL_IS_INT(3))
+    {   
+        printf("    li $t9 %d\n",SYMBOL_INT(3));
+        printf("    %s %s %s $t9\n",comparation,SYMBOL_STR(1),SYMBOL_STR(2));
+    }
+
+    else if(SYMBOL_IS_INT(2) && SYMBOL_IS_STR(3)){
+        printf("    li $t9 %d\n",SYMBOL_INT(2));
+        printf("    %s %s %s $t9\n",comparation,SYMBOL_STR(1),SYMBOL_STR(3));
+    }
+
+    else{
+        //two ints, gotta load one into temp reg
+        printf("    li $t9 %d\n",SYMBOL_INT(2));
+        printf("    li $t8 %d\n",SYMBOL_INT(3));
+        printf("    %s %s $t8 $t9\n",comparation,SYMBOL_STR(1));
+    }
+
+    //printf("cenas: %s %d %d\n",SYMBOL_STR(1),SYMBOL_INT(2),SYMBOL_INT(3));
+    
 }
 
 void compileSingleInstruction(Inst* instruction)
@@ -133,6 +165,27 @@ void compileSingleInstruction(Inst* instruction)
         case DIV:
         printSimpleOperation(instruction,"div");
         break;
+        case EQL:
+        printCompare(instruction,"seq");
+        break;
+        case LESS:
+        printCompare(instruction,"slt");
+        break;
+        case LESSEQ:
+        printCompare(instruction,"sle");
+        break;
+        case MORE:
+        printCompare(instruction,"sgt");
+        break;
+        case MOREEQ:
+        printCompare(instruction,"sge");
+        break;
+        case OR:
+        printCompare(instruction,"or");
+        break;
+        case AND:
+        printCompare(instruction,"and");
+        break;
         case GOTO:
         printf("    j %s\n",SYMBOL_STR(1));
         break;
@@ -140,7 +193,7 @@ void compileSingleInstruction(Inst* instruction)
         printf("    jr $ra\n");
         break;
         case BRANCH_EQ_ZERO:
-        printf("    beq %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
+        printf("    beqz %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
         break;
         case BRANCH_NOT_EQ_ZERO:
         printf("    bneq %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
@@ -151,6 +204,7 @@ void compileSingleInstruction(Inst* instruction)
         case STORE_VARIABLE:
         printStore(instruction);
         break;
+
     }
 }
 

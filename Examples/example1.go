@@ -5,7 +5,11 @@ package main
 import "fmt"
 
 func main() {
-	a:=1;
-	b:=2;
-	c:=a+b;
+
+	c:=true;
+	d:=false;
+
+	if(c || d){
+		e:=3;
+	}
 }
