@@ -70,6 +70,7 @@ Cmd* makeFuncCall(char* funcName, ExprList* variables)
 Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) 
 {
     int regNumber = 0;
+    int stackCount = 0;
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));
     node->kind = C_FUNC;
     node->attr.func.funcName = funcName;
@@ -81,20 +82,23 @@ Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist)
         Expr* expr = getExpr(arglist);
         if (regNumber < ARG_REGISTER_COUNT) 
         {
-            addVariable(node->attr.func.scope, expr->attr.variable, registerr, regNumber);
+            addArgument(node->attr.func.scope, expr->attr.variable, registerr, regNumber);
             regNumber++;
         }
         else 
         {
-            addVariable(node->attr.func.scope, expr->attr.variable, stack, 0);
+            addArgument(node->attr.func.scope, expr->attr.variable, stack, 4*stackCount);
+            stackCount++;
         }
         arglist = arglist->Next;
     }
     VariableList* varlist = checkCmdList(cmdlist);
+    stackCount = 1;
     while(varlist != NULL)
     {
-        addVariable(node->attr.func.scope, getVariable(varlist), stack, 0);
+        addLocalVariable(node->attr.func.scope, getVariable(varlist));
         varlist = varlist->Next;
+        stackCount++;
     }
     //printVariableList(cmdlist);
     return node;

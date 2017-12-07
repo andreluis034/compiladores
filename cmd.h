@@ -12,7 +12,8 @@ struct _Cmd {
 		C_IF_ELSE,
 		C_FOR,
 		C_FUNC_CALL,
-		C_FUNC
+		C_FUNC,
+		C_RETURN
 	} kind;
 	union {
 		struct {
@@ -46,6 +47,9 @@ struct _Cmd {
 			CmdList* commandList;
 			Scope* scope;
 		} func;
+		struct {
+			Expr* value;
+		} _return;
 	} attr;
 };
 typedef struct _Cmd Cmd;

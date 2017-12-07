@@ -11,5 +11,7 @@ func main() {
 
 	if(c || d){
 		e:=3;
+	} else {
+		e:= 2;
 	}
 }
