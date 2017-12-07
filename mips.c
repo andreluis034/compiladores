@@ -76,14 +76,12 @@ void printStore(Inst* instruction){
     //SYMBOL 1: x variavel onde guardar
     //SYMBOL 2: 2 resultado
 
-    if(SYMBOL_IS_STR(2)){
-        printf("    la $t8 %s\n",SYMBOL_STR(1));
-        printf("    sw %s 0($t8)\n",SYMBOL_STR(2));
+    if(SYMBOL_IS_STR(1)){
+        printf("    sw %s %d(%s)\n",SYMBOL_STR(1), SYMBOL_INT(3), SYMBOL_STR(2));
     }
     else{
-        printf("    la $t8 %s\n",SYMBOL_STR(1));
-        printf("    li $t9 %d\n",SYMBOL_INT(2));
-        printf("    sw $t9 0($t8)\n");
+        printf("    li $v1 %d\n",SYMBOL_INT(1));
+        printf("    sw $v1 %d(%s)\n", SYMBOL_INT(3), SYMBOL_STR(2));
     }
 
     //printf("    la %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
@@ -181,6 +179,9 @@ void compileSingleInstruction(Inst* instruction)
         break;
         case STORE_VARIABLE:
         printStore(instruction);
+        break;
+        case LOAD_ADDRESS:
+            printf("    la %s %s\n", SYMBOL_STR(1), SYMBOL_STR(2));
         break;
 
     }
