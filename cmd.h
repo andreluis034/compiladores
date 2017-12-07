@@ -1,6 +1,7 @@
 #pragma once
 #include "list.h"
 #include "ast.h"
+#include "scope.h"
 typedef List CmdList;
 struct _Cmd {
 	enum {
@@ -41,6 +42,7 @@ struct _Cmd {
 			char* funcName;
 			ExprList* argList;
 			CmdList* commandList;
+			Scope* scope;
 		} func;
 	} attr;
 };

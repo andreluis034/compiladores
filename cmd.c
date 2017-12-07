@@ -5,6 +5,8 @@
 #include "cmd.h"
 #include "ast.h"
 #include "utility.h"
+#define ARG_REGISTER_COUNT 4
+
 #define sCase(caso, func) case caso: \
 func(cmd, level, lastChild);\
 break
@@ -12,7 +14,6 @@ makeTypeList(CmdList*, makeCmdList, Cmd*)
 appendType(CmdList*, appendCmd, Cmd*)
 prependType(CmdList*, prependCmd, Cmd*)
 getType(Cmd*, getCmd, CmdList*)
-
 
 /*
 Cmd* getCmd(CmdList* list) 
@@ -69,11 +70,27 @@ Cmd* makeFuncCall(char* funcName, ExprList* variables)
 }
 Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) 
 {
+    int regNumber = 0;
     Cmd* node = (Cmd*) malloc(sizeof(Cmd));
     node->kind = C_FUNC;
     node->attr.func.funcName = funcName;
     node->attr.func.argList = arglist;
     node->attr.func.commandList = cmdlist;
+    node->attr.func.scope = createScope();
+    while(arglist != NULL)
+    {
+        Expr* expr = getExpr(arglist);
+        if (regNumber < ARG_REGISTER_COUNT) 
+        {
+            addVariable(node->attr.func.scope, expr->attr.variable, registerr, regNumber);
+            regNumber++;
+        }
+        else 
+        {
+            addVariable(node->attr.func.scope, expr->attr.variable, stack, 0);
+        }
+        arglist = arglist->Next;
+    }
     return node;
 }
 
