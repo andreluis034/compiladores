@@ -33,6 +33,6 @@ Variable* getVariableScope(Scope* s, char* varName)
 {
     Variable* v = (Variable*)getKeyValue(s->hashmap, varName);
     if(v == NULL && s->parent != NULL)
-        return getVariable(s->parent, varName);
+        return getVariableScope(s->parent, varName);
     return v;
 }
