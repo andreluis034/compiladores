@@ -21,8 +21,12 @@ void addVariable(Scope* s, char* varName, VariableLocation varLocation, int regi
     if(v->location == stack) 
     {
         v->position.stackOffset = registerNumber;
-        if(registerNumber < 0) //Not the arguments 
+        if(registerNumber < 0) {
+            //Not the arguments 
+            v->position.stackOffset = -s->scope_size;
             s->scope_size += 4;
+            
+        }
         s->total_size += 4; 
     }
     else

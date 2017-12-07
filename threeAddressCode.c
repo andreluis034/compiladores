@@ -13,7 +13,7 @@ unsigned int tCount = 0;
 unsigned int labelCount = 0;
 Register registers[REGISTER_COUNT] =  {0};
 char* registerNames[] = {"$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3","$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7", "$t8", "$t9","$k0", "$k1", "$gp", "$sp", "$fp", "$ra"};
-
+Scope* currentScope;
 makeTypeList(InstList*, makeInstList, Inst*)
 appendType(InstList*, appendInst, Inst*)
 prependType(InstList*, prependInst, Inst*)
@@ -319,8 +319,8 @@ InstList* compileCommand(Cmd* cmd)
 			symbol = getNextSymbol(STACK_POINTER);
 			symbol2 = getNextSymbol(FRAME_POINTER);
 			compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
-			//STACK ALLOCATION
 			instructionList = appendInst(instructionList, compiledInst);
+			//STACK ALLOCATION
 			//addi $sp $sp -4
 			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-4));
 			instructionList = appendInst(instructionList, compiledInst);
@@ -334,12 +334,11 @@ InstList* compileCommand(Cmd* cmd)
 			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
 			instructionList = appendInst(instructionList, compiledInst);
 			//sw $ra -8($fp)
-			compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
+			//compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
 			instructionList = appendInst(instructionList, compiledInst);
 
 			//Normal function operation
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.func.commandList));
-			instructionList = prependInst(instructionList, compiledInst);
 
 			//addi $sp $sp total_size
 			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->total_size));
