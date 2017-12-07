@@ -355,27 +355,27 @@ InstList* compileCommand(Cmd* cmd)
 		
 		
 		
-		/*		E_INTEGER,
-		E_OPERATION,
-		E_VARIABLE,*/
-		Pair* makePairExpr(Expr* expr) 
-		{
-			Pair* p1;
-			Pair* p2;
-			switch(expr->kind) 
-			{
-				case E_BOOL:
-				case E_INTEGER:
-				return makePairInt(expr->attr.value, NULL);
-				case E_VARIABLE: 
-				return loadVariable(expr->attr.variable);// makePairStr(expr->attr.variable, NULL);
-				case E_OPERATION: 
-				p1 = makePairExpr(expr->attr.op.left);
-				p2 = makePairExpr(expr->attr.op.right);
-				return CompileExpression(expr->attr.op.operator, p1, p2);
-				default:
-				printf("YOU FORGOT SOMETHING IDIOT type: %d\n", expr->kind); //TODO REMOVE
-				return NULL;
-			}	
-			return NULL;
-		}
+/*      E_INTEGER,
+E_OPERATION,
+E_VARIABLE,*/
+Pair* makePairExpr(Expr* expr) 
+{
+    Pair* p1;
+    Pair* p2;
+    switch(expr->kind) 
+    {
+        case E_BOOL:
+        case E_INTEGER:
+        return makePairInt(expr->attr.value, NULL);
+        case E_VARIABLE: 
+        return loadVariable(expr->attr.variable);// makePairStr(expr->attr.variable, NULL);
+        case E_OPERATION: 
+        p1 = makePairExpr(expr->attr.op.left);
+        p2 = makePairExpr(expr->attr.op.right);
+        return CompileExpression(expr->attr.op.operator, p1, p2);
+        default:
+        printf("YOU FORGOT SOMETHING IDIOT type: %d\n", expr->kind); //TODO REMOVE
+        return NULL;
+    }   
+    return NULL;
+}
