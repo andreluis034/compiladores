@@ -4,12 +4,15 @@
 #include "threeAddressCode.h"
 #define GET_T (tCount++)
 #define GET_LABEL (labelCount++)
-#define REGISTER_COUNT 24
+#define REGISTER_COUNT 32
 #define ARG_REGISTER_START 4
+#define STACK_POINTER 29
+#define FRAME_POINTER 30
+#define RETURN_ADDRESS 31
 unsigned int tCount = 0;
 unsigned int labelCount = 0;
 Register registers[REGISTER_COUNT] =  {0};
-char* registerNames[] = {"$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3","$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7"};
+char* registerNames[] = {"$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3","$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7", "$t8", "$t9","$k0", "$k1", "$gp", "$sp", "$fp", "$ra"};
 
 makeTypeList(InstList*, makeInstList, Inst*)
 appendType(InstList*, appendInst, Inst*)
@@ -24,7 +27,7 @@ void initializeRegisters()
 	{
 		registers[i].registerName = registerNames[i];
 		registers[i].registerNumber = i;
-		registers[i].used = (i <= 7) ? 1 : 0;
+		registers[i].used = (i <= 7 || i >= 24) ? 1 : 0;
 		registers[i].variableRepresented = NULL;
 	}
 }
@@ -227,6 +230,7 @@ InstList* compileCommand(Cmd* cmd)
 	Pair* var;
 	int regCount = 0;
 	InstSymbol* symbol;
+	InstSymbol* symbol2;
 	Inst* compiledInst;
 	InstSymbol* exitif;
 	char op[2];
@@ -309,8 +313,21 @@ InstList* compileCommand(Cmd* cmd)
 		break;
 			
 		case C_FUNC: //TODO arguments
+			symbol = getNextSymbol(STACK_POINTER);
+			symbol2 = getNextSymbol(FRAME_POINTER);
 			compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
-			instructionList = compileCmdList(cmd->attr.func.commandList);
+			//STACK ALLOCATION
+			instructionList = appendInst(instructionList, compiledInst);
+			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-4));
+			instructionList = appendInst(instructionList, compiledInst);
+			compiledInst = makeInstruction(STORE_VARIABLE, symbol2, symbol, NULL);
+			instructionList = appendInst(instructionList, compiledInst);
+			compiledInst = makeInstruction(ADD, symbol2, getNextSymbol(0), symbol);
+			instructionList = appendInst(instructionList, compiledInst);
+			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size));
+			instructionList = appendInst(instructionList, compiledInst);
+
+			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.func.commandList));
 			instructionList = prependInst(instructionList, compiledInst);
 			instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
 			//TODO jal?
