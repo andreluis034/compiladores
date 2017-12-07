@@ -341,7 +341,7 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.func.commandList));
 
 			//addi $sp $sp total_size
-			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->total_size));
+			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->scope_size));
 			instructionList = appendInst(instructionList, compiledInst);
 			//lw $ra -8($fp)
 			compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
