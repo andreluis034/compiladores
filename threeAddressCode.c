@@ -340,7 +340,7 @@ InstList* compileCommand(Cmd* cmd)
 					{
 						compiledInst = makeInstruction(LOAD_ARGUMENT_STACK, compiledExpr->symbol, NULL, NULL);
 					}
-					instructionList = apppendInst(compiledExpr->instructionList, compiledInst);
+					instructionList = appendInst(compiledExpr->instructionList, compiledInst);
 					freeRegister(compiledExpr->symbol);
 					exprlist = exprlist->Next;
 				}
