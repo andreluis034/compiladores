@@ -5,7 +5,6 @@
 #include "cmd.h"
 #include "ast.h"
 #include "utility.h"
-#define ARG_REGISTER_COUNT 4
 
 #define sCase(caso, func) case caso: \
 func(cmd, level, lastChild);\

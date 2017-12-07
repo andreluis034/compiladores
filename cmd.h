@@ -2,6 +2,8 @@
 #include "list.h"
 #include "ast.h"
 #include "scope.h"
+#define ARG_REGISTER_COUNT 4
+
 typedef List CmdList;
 struct _Cmd {
 	enum {
