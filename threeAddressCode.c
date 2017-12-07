@@ -235,9 +235,12 @@ InstList* compileCommand(Cmd* cmd)
 		case C_DECLARATION:
 			compiledExpr = makePairExpr(cmd->attr.declaration.expr);
 			instructionList = compiledExpr->instructionList;
-			instructionList = appendInst(instructionList, 
-				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
-				compiledExpr->symbol, NULL));
+			symbol = getNextSymbol(getFreeRegister());
+			compiledInst = makeInstruction(LOAD_ADDRESS, symbol, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), NULL);
+			instructionList = appendInst(instructionList, compiledInst);
+			compiledInst = makeInstruction(STORE_VARIABLE, compiledExpr->symbol, symbol, makeInstSymbolInt(0));
+			instructionList = appendInst(instructionList, compiledInst);
+			freeRegister(symbol);
 			if(compiledExpr->symbol->type == S_STR)
 				freeRegister(compiledExpr->symbol);
 			break;
