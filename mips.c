@@ -146,7 +146,8 @@ void printCompare(Inst* instruction, char* comparation){
 
 void compileSingleInstruction(Inst* instruction)
 {
-    
+    if(instruction == NULL)
+        return;
     
     switch(instruction->type)
     {
