@@ -166,6 +166,15 @@ void compileSingleInstruction(Inst* instruction)
         printf("    j %s\n",SYMBOL_STR(1));
         break;
         case RETURN://TODO return values
+        if(instruction->p1 != NULL)
+        {
+            if(SYMBOL_IS_INT(1))
+                printf("    addi $v0 $zero %d\n", SYMBOL_INT(1));
+            else
+                printf("    add $v0 $zero %s\n", SYMBOL_STR(1));
+        }
+        //
+        
         printf("    jr $ra\n");
         break;
         case BRANCH_EQ_ZERO:
@@ -175,7 +184,10 @@ void compileSingleInstruction(Inst* instruction)
         printf("    bneq %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
         break;
         case LOAD_VARIABLE: //TODO
-        printf("    lw %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
+        if(SYMBOL_STR(2)[0] == '$')
+            printf("    lw %s %d(%s)\n",SYMBOL_STR(1),SYMBOL_INT(3), SYMBOL_STR(2));
+        else
+            printf("    lw %s %s\n",SYMBOL_STR(1), SYMBOL_STR(2));
         break;
         case STORE_VARIABLE:
         printStore(instruction);

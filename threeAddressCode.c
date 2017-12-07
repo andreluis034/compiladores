@@ -321,17 +321,36 @@ InstList* compileCommand(Cmd* cmd)
 			compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
 			//STACK ALLOCATION
 			instructionList = appendInst(instructionList, compiledInst);
+			//addi $sp $sp -4
 			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-4));
 			instructionList = appendInst(instructionList, compiledInst);
-			compiledInst = makeInstruction(STORE_VARIABLE, symbol2, symbol, NULL);
+			//sw $fp 0($sp)
+			compiledInst = makeInstruction(STORE_VARIABLE, symbol2, symbol, makeInstSymbolInt(0));
 			instructionList = appendInst(instructionList, compiledInst);
-			compiledInst = makeInstruction(ADD, symbol2, getNextSymbol(0), symbol);
+			//addi $fp $sp 4 
+			compiledInst = makeInstruction(ADD, symbol2, symbol, makeInstSymbolInt(4));
 			instructionList = appendInst(instructionList, compiledInst);
-			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size));
+			//addi $sp $sp -(scope_size - 4)
+			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
+			instructionList = appendInst(instructionList, compiledInst);
+			//sw $ra -8($fp)
+			compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
 			instructionList = appendInst(instructionList, compiledInst);
 
+			//Normal function operation
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.func.commandList));
 			instructionList = prependInst(instructionList, compiledInst);
+
+			//addi $sp $sp total_size
+			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->total_size));
+			instructionList = appendInst(instructionList, compiledInst);
+			//lw $ra -8($fp)
+			compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
+			instructionList = appendInst(instructionList, compiledInst);
+			//lw $fp -8($fp)
+			compiledInst = makeInstruction(LOAD_VARIABLE, symbol2, symbol2, makeInstSymbolInt(-4));
+			instructionList = appendInst(instructionList, compiledInst);
+
 			instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
 			//TODO jal?
 		break;
