@@ -93,6 +93,25 @@ void printSimpleOperation(Inst* instruction, char* addorsub){
     
 }
 
+void printStore(Inst* instruction){
+
+    //x:=2;
+    //SYMBOL 1: x variavel onde guardar
+    //SYMBOL 2: 2 resultado
+
+    if(SYMBOL_IS_STR(2)){
+        printf("    la $at %s\n",SYMBOL_STR(1));
+        printf("    sw %s 0($at)\n",SYMBOL_STR(2));
+    }
+    else{
+        printf("    la $at %s\n",SYMBOL_STR(1));
+        printf("    li $v1 %d\n",SYMBOL_INT(2));
+        printf("    sw $v1 0($at)\n");
+    }
+
+    //printf("    la %s %d\n",SYMBOL_STR(1),SYMBOL_INT(2));
+}
+
 void compileSingleInstruction(Inst* instruction)
 {
     
@@ -125,6 +144,12 @@ void compileSingleInstruction(Inst* instruction)
         break;
         case BRANCH_NOT_EQ_ZERO:
         printf("    bneq %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
+        break;
+        case LOAD_VARIABLE: //TODO
+        printf("    lw %s %s\n",SYMBOL_STR(1),SYMBOL_STR(2));
+        break;
+        case STORE_VARIABLE:
+        printStore(instruction);
         break;
     }
 }
