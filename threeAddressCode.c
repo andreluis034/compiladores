@@ -334,7 +334,7 @@ InstList* compileCommand(Cmd* cmd)
 			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
 			instructionList = appendInst(instructionList, compiledInst);
 			//sw $ra -8($fp)
-			//compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
+			compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
 			instructionList = appendInst(instructionList, compiledInst);
 
 			//Normal function operation
