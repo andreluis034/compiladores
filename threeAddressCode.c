@@ -4,11 +4,11 @@
 #include "threeAddressCode.h"
 #define GET_T (tCount++)
 #define GET_LABEL (labelCount++)
-#define REGISTER_COUNT 26
+#define REGISTER_COUNT 24
 unsigned int tCount = 0;
 unsigned int labelCount = 0;
 Register registers[REGISTER_COUNT] =  {0};
-char* registerNames[] = {"$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3","$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7","$t8","$t9"};
+char* registerNames[] = {"$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3","$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7"};
 
 makeTypeList(InstList*, makeInstList, Inst*)
 appendType(InstList*, appendInst, Inst*)
@@ -58,7 +58,7 @@ int getFreeRegister()
 			}
 			ret = i;
 		}
-
+		
 	}
 	registers[ret].variableRepresented = NULL;
 	registers[i].used = 1;
@@ -120,7 +120,7 @@ InstSymbol* getNextSymbol(int reg)
 		exit(-1);
 	}
 	return makeInstSymbolStr(registers[reg].registerName);
-
+	
 }
 
 InstSymbol* getLabel() 
@@ -166,9 +166,9 @@ Inst* makeInstruction(InstType type, InstSymbol* s1, InstSymbol* s2, InstSymbol*
 Pair* CompileExpression(char* operator, Pair* left, Pair* right) 
 {
 	if(left->symbol->type == S_STR)
-		freeRegister(left->symbol);
+	freeRegister(left->symbol);
 	if(right->symbol->type == S_STR)
-		freeRegister(right->symbol);
+	freeRegister(right->symbol);
 	InstSymbol* nextSymbol = getNextSymbol(getFreeRegister());//TODO: use one of the expressions
 	InstList* requiredInstructions = concatInst(left->instructionList, right->instructionList); 
 	COMPILE_OPERATOR(if, "*", MUL)
@@ -223,92 +223,92 @@ InstList* compileCommand(Cmd* cmd)
 	char op[2];
 	switch(cmd->kind) 
 	{
-				case C_DECLARATION:
-				compiledExpr = makePairExpr(cmd->attr.declaration.expr);
-				instructionList = compiledExpr->instructionList;
-				instructionList = appendInst(instructionList, 
+		case C_DECLARATION:
+			compiledExpr = makePairExpr(cmd->attr.declaration.expr);
+			instructionList = compiledExpr->instructionList;
+			instructionList = appendInst(instructionList, 
 				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
 				compiledExpr->symbol, NULL));
-				if(compiledExpr->symbol->type == S_STR)
+			if(compiledExpr->symbol->type == S_STR)
 				freeRegister(compiledExpr->symbol);
-				break;
-
-				case C_INCREMENT:
-				var = makePairExpr(cmd->attr.increment.variable);
-				//compiledExpr = makePairExpr(cmd->attr.increment.)
-				if(strcmp(cmd->attr.increment.operator, "++") == 0 || strcmp(cmd->attr.increment.operator, "--") == 0) 
-				{
-					compiledExpr = makePairInt(1, NULL);
-				}
-				else 
-				{
-					compiledExpr = makePairExpr(cmd->attr.increment.expr);
-				}
-				op[0] = cmd->attr.increment.operator[0];
-				op[1] = 0;
-				compiledExpr = CompileExpression(op, var, compiledExpr);
-				instructionList = compiledExpr->instructionList;
-				instructionList = appendInst(instructionList, 
-				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
-				compiledExpr->symbol, NULL));
-				if(compiledExpr->symbol->type == S_STR)
-				freeRegister(compiledExpr->symbol);		
-				//appendInst(makeInstruction(ADD,))
-				break;
-
-				case C_FOR:
-				//inst inicial
-				instructionList = compileCommand(cmd->attr.forCmd.initial);
-				//instructionList = appendInst(instructionList,compiledInst);
-				//LABEL
-				symbol = getLabel();
-				instructionList = appendInst(instructionList,makeInstruction(LABEL,symbol,NULL,NULL));
-				//TEST
-				compiledExpr = makePairExpr(cmd->attr.forCmd.condition);
-				instructionList = concatList(instructionList,compiledExpr->instructionList);
-				//BRANCH_EQ_ZERO
-				exitif = getLabel();
-				instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, exitif, NULL));
-				freeRegister(compiledExpr->symbol);
-				//CMDLIST
-				instructionList = concatInst(instructionList,compileCmdList(cmd->attr.forCmd.body));
-				//INST
-				instructionList = concatInst(instructionList,compileCommand(cmd->attr.forCmd.afterIteration));
-				//GOTO LABEL
-				instructionList = appendInst(instructionList,makeInstruction(GOTO,symbol,NULL,NULL));
-				//LABEL1
-				instructionList = appendInst(instructionList,makeInstruction(LABEL,exitif,NULL,NULL));
-				break;
-
-				case C_IF_ELSE: 
-				//Compile expression
-				compiledExpr = makePairExpr(cmd->attr.ifelse.condition);
-				instructionList = compiledExpr->instructionList;
-				symbol = getLabel();
-				exitif = getLabel();
-				//TEST
-				instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, symbol, NULL));
-				freeRegister(compiledExpr->symbol);
-				//IFTRUE
-				instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iftrue));
-				instructionList = appendInst(instructionList, makeInstruction(GOTO, exitif, NULL, NULL)); //EXIT
-				//IFFALSE
-				instructionList = appendInst(instructionList, makeInstruction(LABEL, symbol, NULL, NULL));
-				instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iffalse));
-				//FINISH
-				instructionList = appendInst(instructionList, makeInstruction(LABEL, exitif, NULL, NULL));
-				break;
-				
-				case C_FUNC: //TODO arguments
-				compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
-				instructionList = compileCmdList(cmd->attr.func.commandList);
-				instructionList = prependInst(instructionList, compiledInst);
-				instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
-				//TODO jal?
-				break;
+			break;
+			
+		case C_INCREMENT:
+			var = makePairExpr(cmd->attr.increment.variable);
+			//compiledExpr = makePairExpr(cmd->attr.increment.)
+			if(strcmp(cmd->attr.increment.operator, "++") == 0 || strcmp(cmd->attr.increment.operator, "--") == 0) 
+			{
+				compiledExpr = makePairInt(1, NULL);
 			}
-			return instructionList;
-		}
+			else 
+			{
+				compiledExpr = makePairExpr(cmd->attr.increment.expr);
+			}
+			op[0] = cmd->attr.increment.operator[0];
+			op[1] = 0;
+			compiledExpr = CompileExpression(op, var, compiledExpr);
+			instructionList = compiledExpr->instructionList;
+			instructionList = appendInst(instructionList, 
+				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
+				compiledExpr->symbol, NULL));
+			if(compiledExpr->symbol->type == S_STR)
+				freeRegister(compiledExpr->symbol);		
+			//appendInst(makeInstruction(ADD,))
+			break;
+				
+		case C_FOR:
+			//inst inicial
+			instructionList = compileCommand(cmd->attr.forCmd.initial);
+			//instructionList = appendInst(instructionList,compiledInst);
+			//LABEL
+			symbol = getLabel();
+			instructionList = appendInst(instructionList,makeInstruction(LABEL,symbol,NULL,NULL));
+			//TEST
+			compiledExpr = makePairExpr(cmd->attr.forCmd.condition);
+			instructionList = concatList(instructionList,compiledExpr->instructionList);
+			//BRANCH_EQ_ZERO
+			exitif = getLabel();
+			instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, exitif, NULL));
+			freeRegister(compiledExpr->symbol);
+			//CMDLIST
+			instructionList = concatInst(instructionList,compileCmdList(cmd->attr.forCmd.body));
+			//INST
+			instructionList = concatInst(instructionList,compileCommand(cmd->attr.forCmd.afterIteration));
+			//GOTO LABEL
+			instructionList = appendInst(instructionList,makeInstruction(GOTO,symbol,NULL,NULL));
+			//LABEL1
+			instructionList = appendInst(instructionList,makeInstruction(LABEL,exitif,NULL,NULL));
+		break;
+			
+		case C_IF_ELSE: 
+			//Compile expression
+			compiledExpr = makePairExpr(cmd->attr.ifelse.condition);
+			instructionList = compiledExpr->instructionList;
+			symbol = getLabel();
+			exitif = getLabel();
+			//TEST
+			instructionList = appendInst(instructionList, makeInstruction(BRANCH_EQ_ZERO, compiledExpr->symbol, symbol, NULL));
+			freeRegister(compiledExpr->symbol);
+			//IFTRUE
+			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iftrue));
+			instructionList = appendInst(instructionList, makeInstruction(GOTO, exitif, NULL, NULL)); //EXIT
+			//IFFALSE
+			instructionList = appendInst(instructionList, makeInstruction(LABEL, symbol, NULL, NULL));
+			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iffalse));
+			//FINISH
+			instructionList = appendInst(instructionList, makeInstruction(LABEL, exitif, NULL, NULL));
+		break;
+			
+		case C_FUNC: //TODO arguments
+			compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
+			instructionList = compileCmdList(cmd->attr.func.commandList);
+			instructionList = prependInst(instructionList, compiledInst);
+			instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
+			//TODO jal?
+		break;
+	}
+	return instructionList;
+}
 		
 		
 		
