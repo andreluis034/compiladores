@@ -279,7 +279,7 @@ InstList* activationFunctionRecord(Cmd* cmd)
 	return instructionList;
 }
 
-InstList* storeCompiledExpression(Pair* expr, char* varName)
+InstList* storeCompiledExpression(Pair* expr, char* varName) //TODO update register
 {
 	Inst* compiledInst = NULL;
 	InstList* instructionList = expr->instructionList;
