@@ -331,7 +331,7 @@ InstList* restoreRegisters()
 		{
 			if((i >= 4 && i <= 7 && currentScope->argument_registers + ARG_REGISTER_START - 1 >= i) || i > 7 )
 			{
-				printf("#restore");
+				//printf("#restore");
 				instructionList = appendInst(instructionList, makeInstruction(POP, getNextSymbol(registers[i].registerNumber), NULL, NULL));
 			} 
 		}
@@ -480,6 +480,10 @@ InstList* compileCommand(Cmd* cmd)
 				instructionList = appendInst(instructionList, compiledInst);
 			}
 			instructionList = concatList(instructionList, restoreRegisters());
+		break;
+		case C_FUNC_RETURN:
+			instructionList = compileCommand(cmd->attr.funcReturn.funcCall);
+			instructionList = concatInst(instructionList, storeCompiledExpression(makePairStr("$v0",NULL),cmd->attr.funcReturn.variable->attr.variable));
 		break;
 		
 	}

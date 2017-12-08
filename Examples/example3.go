@@ -2,7 +2,19 @@ package main
 
 import "fmt"
 
+func dobra(x){
+    x:=x*2;
+    return x;
+}
+
+
 func main() {
-    b:=2;
-    a:= punhetasFortes(b);
+
+    x:=0;
+
+    fmt.Scan(x);
+
+    x:=dobra(x);
+
+    fmt.Print(x);
 }

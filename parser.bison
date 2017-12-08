@@ -5,6 +5,7 @@
 %token <command> FUNC_TOKEN
 %token PRINT_FUNCTION_TOKEN
 %token SCAN_FUNCTION_TOKEN
+%token RETURN_TOKEN
 %token IF_TOKEN
 %token FOR_TOKEN
 %token ELSE_TOKEN
@@ -60,6 +61,7 @@
 %type <command> func_declaration;
 %type <command> cmd;
 %type <command> declaration
+%type <command> return
 %type <command> increment
 %type <command> if
 %type <command> for_one_arg
@@ -107,6 +109,7 @@ func_declaration: FUNC_TOKEN VAR_TOKEN OPENPAR_TOKEN var_list CLOSEPAR_TOKEN OPE
 
 func_call: VAR_TOKEN OPENPAR_TOKEN arg_list CLOSEPAR_TOKEN { $$ = makeFuncCall($1, $3);}
 
+return: RETURN_TOKEN expr { $$ = makeReturn($2);}
 
 cmd_list: {$$ = EMPTY_LIST;};
 	 | cmd cmd_list {$$ = prependCmd($2, $1);}
@@ -121,6 +124,7 @@ cmd: declaration SEPARATOR_TOKEN
    | print SEPARATOR_TOKEN
    | scan SEPARATOR_TOKEN
    | func_call SEPARATOR_TOKEN
+   | return SEPARATOR_TOKEN
 
 
 var_list:{$$ = EMPTY_LIST;}

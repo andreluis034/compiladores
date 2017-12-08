@@ -163,6 +163,11 @@ true|false {
         return FUNC_TOKEN;
        }
 
+"return" {
+        sumChars;
+        return RETURN_TOKEN;
+       }       
+
 ";" { 
         //printf("SEPARATOR_TOKEN\n");
         sumChars;
