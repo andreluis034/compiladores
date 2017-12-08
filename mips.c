@@ -209,13 +209,6 @@ void compileSingleInstruction(Inst* instruction)
         case FUNC_CALL:
             printf("    jal %s\n", SYMBOL_STR(1));
         break;
-        case LOAD_ARGUMENT_STACK:
-            /*sub $sp,$sp,4
-              sw %register,($sp)
-            */
-            printf("    subi $sp $sp 4\n");
-            printf("    sw %s 0($sp)\n",SYMBOL_STR(1)); 
-        break;
     }
 }
 
