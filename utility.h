@@ -15,6 +15,7 @@ void checkIfElse(Cmd* cmd) ;
 void checkFor(Cmd* cmd) ;
 void checkFunc(Cmd* cmd) ;
 void checkCmd(Cmd* cmd) ;
+void checkFuncReturn(Cmd* cmd) ;
 VariableList* checkCmdList(CmdList* cmdlist);
 int existsVariable(VariableList* list, char* toFind);
 void printVariableList(VariableList* list);

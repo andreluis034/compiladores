@@ -73,3 +73,4 @@ Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body )
 Cmd* makeFuncCall(char* funcName, ExprList* variables) ;
 Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) ;
 Cmd* makeFunctionReturn(Expr* variable, char* operator, Cmd* funcCall) ;
+Cmd* makeReturn(Expr* expr);

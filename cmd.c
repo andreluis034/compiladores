@@ -78,6 +78,14 @@ Cmd* makeFunctionReturn(Expr* variable, char* operator, Cmd* funcCall)
     return node;
 }
 
+Cmd* makeReturn(Expr* expr)
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_RETURN;
+    node->attr._return.value = expr;
+    return node;
+}
+
 Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) 
 {
     int regNumber = 0;
@@ -193,6 +201,12 @@ void printFuncReturn(Cmd* cmd, int level, int lastChild)
     printFuncCall(cmd->attr.funcReturn.funcCall,level + 1,1);
 }
 
+void printReturn(Cmd* cmd, int level, int lastChild){
+    printPadding(level, lastChild);
+    printf("C_RETURN\n");
+    printExpr(cmd->attr._return.value, level+1, 1);
+}
+
 void printCmd(Cmd* cmd, int level, int lastChild)  
 {
     switch(cmd->kind)
@@ -204,6 +218,7 @@ void printCmd(Cmd* cmd, int level, int lastChild)
         sCase(C_FUNC_CALL, printFuncCall);
         sCase(C_FUNC_RETURN, printFuncReturn);
         sCase(C_FUNC, printFunc);
+        sCase(C_RETURN, printReturn);
     }
 }
 

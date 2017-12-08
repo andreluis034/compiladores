@@ -480,6 +480,10 @@ InstList* compileCommand(Cmd* cmd)
 			}
 			instructionList = concatList(instructionList, restoreRegisters());
 		break;
+		case C_FUNC_RETURN:
+			instructionList = compileCommand(cmd->attr.funcReturn.funcCall);
+			instructionList = concatInst(instructionList, storeCompiledExpression(makePairStr("$v0",NULL),cmd->attr.funcReturn.variable->attr.variable));
+		break;
 		
 	}
 	return instructionList;

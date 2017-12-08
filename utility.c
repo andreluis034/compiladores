@@ -87,6 +87,17 @@ void checkDeclaration(Cmd* cmd)
     
 }
 
+void checkFuncReturn(Cmd* cmd)  
+{   
+    //printf("%s\n",cmd->attr.declaration.variable->attr.variable);
+    if(existsVariable(globalVariables,cmd->attr.funcReturn.variable->attr.variable)){
+    }
+    else{
+        globalVariables = appendVariable(globalVariables,cmd->attr.funcReturn.variable->attr.variable);
+    }
+    
+}
+
 
 void checkIfElse(Cmd* cmd)  
 {
@@ -151,6 +162,9 @@ void checkCmd(Cmd* cmd)
 
         case C_DECLARATION:
             checkDeclaration(cmd);
+        break;
+        case C_FUNC_RETURN:
+            checkFuncReturn(cmd);
         break;
     }
 }
