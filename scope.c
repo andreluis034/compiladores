@@ -39,11 +39,11 @@ void addLocalVariable(Scope* s, char* varName)
 {
     if(getVariableScope(s, varName) != NULL)
         return;
+    s->scope_size += 4;
     Variable* v = malloc(sizeof(Variable));
     v->varName = varName;
     v->location = stack;
     v->position.stackOffset = -s->scope_size;
-    s->scope_size += 4;
 
     addKeyValue(s->hashmap, varName, v);
 }

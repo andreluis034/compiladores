@@ -241,7 +241,7 @@ InstList* returnFunction()
 	InstSymbol* symbol = getNextSymbol(STACK_POINTER);
 	InstSymbol* symbol2 = getNextSymbol(FRAME_POINTER);
 	//addi $sp $sp total_size
-	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(currentScope->scope_size - 4));
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(currentScope->scope_size));
 	instructionList = appendInst(instructionList, compiledInst);
 	//lw $ra -8($fp)
 	compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
@@ -273,7 +273,7 @@ InstList* activationFunctionRecord(Cmd* cmd)
 	compiledInst = makeInstruction(ADD, symbol2, symbol, makeInstSymbolInt(4));
 	instructionList = appendInst(instructionList, compiledInst);
 	//addi $sp $sp -(scope_size - 4)
-	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 8));
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
 	instructionList = appendInst(instructionList, compiledInst);
 	//sw $ra -8($fp)
 	compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
@@ -453,8 +453,6 @@ InstList* compileCommand(Cmd* cmd)
 				
 				while(exprlist != NULL) {
 					compiledExpr = makePairExpr(getExpr(exprlist));
-					if(compiledExpr->symbol->symbol.str[1] == 'a')
-						printf("WTF?\n");
 					if(regCount < ARG_REGISTER_COUNT)
 					{
 						compiledInst = makeInstruction(LOAD_ARGUMENT_REGISTER, getNextSymbol(regCount + ARG_REGISTER_START), compiledExpr->symbol, NULL);

@@ -2,14 +2,15 @@ package main
 import "fmt"
 
 func main() {
-	c := 20;
 
-	fib(5);
-
+	a := fib(3);
+	fmt.Print(a);
 }
 func fib(a) {
-	if(a > 0) {
-		fib(a-1);
+	if(a < 2) {
+		return a;
 	}
-	fmt.Print(a);
+	c := fib(a-1);
+	b := fib(a-2);
+	return c + b;
 }
