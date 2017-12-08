@@ -220,7 +220,7 @@ Pair* loadVariable(char* varName)
 	}	
 	if(variable->location == registerr)
 	{
-		return makePair(getNextSymbol(variable->position.registerNumber), lw);
+		return makePair(getNextSymbol(variable->position.registerNumber + ARG_REGISTER_START), lw);
 	}
 	int reg = getFreeRegisterForVariable(varName, &reuse);
 	InstSymbol* is = getNextSymbol(reg);
