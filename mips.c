@@ -204,7 +204,7 @@ void compileSingleInstruction(Inst* instruction)
             break;
         case POP:
         printf("    lw %s 0($sp)\n", SYMBOL_STR(1));
-                printf("    addi $sp $sp 4\n");
+        printf("    addi $sp $sp 4\n");
         break;
         case FUNC_CALL:
             printf("    jal %s\n", SYMBOL_STR(1));
