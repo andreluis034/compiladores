@@ -1,6 +1,7 @@
 #include "scope.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 Scope* createScope()
 {
     Scope* s = malloc(sizeof(Scope));

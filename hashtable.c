@@ -29,7 +29,7 @@ void addKeyValue(hashmap* hm, char* key, void* value)
     hashmap_pair* pair = malloc(sizeof(hashmap_pair));
     pair->key = key;
     pair->value = value;
-    hm->map[hash] = prependToList(hm->map[hash], value);
+    hm->map[hash] = prependToList(hm->map[hash], pair);
 }
 
 void* getKeyValue(hashmap* hm, char* key) 

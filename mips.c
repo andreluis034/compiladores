@@ -190,7 +190,14 @@ void compileSingleInstruction(Inst* instruction)
             printf("    la %s %s\n", SYMBOL_STR(1), SYMBOL_STR(2));
         break;
         case LOAD_ARGUMENT_REGISTER:
-            printf("    la %s 0(%s)\n", SYMBOL_STR(1),SYMBOL_STR(2));
+            if(SYMBOL_IS_INT(2))
+            {
+                printf("    addi %s $zero %d\n", SYMBOL_STR(1), SYMBOL_INT(2));
+            }
+            else 
+            {
+                printf("    add %s $zero %s\n", SYMBOL_STR(1), SYMBOL_STR(2));
+            }
         break;
         case FUNC_CALL:
             printf("    jal %s\n", SYMBOL_STR(1));

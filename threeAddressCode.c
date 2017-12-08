@@ -100,6 +100,10 @@ int getFreeRegisterForVariable(char* varName, int* reused) {
 void freeRegister(InstSymbol* symb) 
 {
 	int i;
+	if(symb->symbol.str[1] == 'z')
+	{
+		return;
+	}
 	if(symb->type == S_INT) 
 	{
 		printf("#TRYING TO FREE CONSTANT %d\n", symb->symbol.number);
@@ -175,6 +179,7 @@ Pair* CompileExpression(char* operator, Pair* left, Pair* right)
 	if(right->symbol->type == S_STR)
 	freeRegister(right->symbol);
 	InstSymbol* nextSymbol = getNextSymbol(getFreeRegister());//TODO: use one of the expressions
+	printf("#%s\n",nextSymbol->symbol.str);
 	InstList* requiredInstructions = concatInst(left->instructionList, right->instructionList); 
 	COMPILE_OPERATOR(if, "*", MUL)
 	COMPILE_OPERATOR(else if, "/", DIV)
@@ -207,20 +212,94 @@ Pair* loadVariable(char* varName)
 	int reuse = 0;
 	Inst* inst = NULL;
 	InstList* lw = EMPTY_LIST;
+	Variable* variable = getVariableScope(currentScope, varName);
+	if(variable == NULL)
+	{
+		printf("%s variable not found in the current scope\n", varName);
+		exit(-1);
+	}	
+	if(variable->location == registerr)
+	{
+		return makePair(getNextSymbol(variable->position.registerNumber), lw);
+	}
 	int reg = getFreeRegisterForVariable(varName, &reuse);
 	InstSymbol* is = getNextSymbol(reg);
 	if(reuse == 0) 
 	{
-		inst = makeInstruction(LOAD_VARIABLE, is, makeInstSymbolStr(varName), NULL);
+		inst = makeInstruction(LOAD_VARIABLE, is, makeInstSymbolStr("$fp"), makeInstSymbolInt( variable->position.stackOffset));
 	}
 	lw = prependInst(lw, inst);
 	return makePair(is, lw);
 }
 
-Pair* loadVariableAddress(char* varName)
+InstList* returnFunction(Cmd* cmd)
 {
+	InstList* instructionList = EMPTY_LIST;
+	Inst* compiledInst;
+	InstSymbol* symbol = getNextSymbol(STACK_POINTER);
+	InstSymbol* symbol2 = getNextSymbol(FRAME_POINTER);
+	//addi $sp $sp total_size
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->scope_size));
+	instructionList = appendInst(instructionList, compiledInst);
+	//lw $ra -8($fp)
+	compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
+	instructionList = appendInst(instructionList, compiledInst);
+	//lw $fp -8($fp)
+	compiledInst = makeInstruction(LOAD_VARIABLE, symbol2, symbol2, makeInstSymbolInt(-4));
+	instructionList = appendInst(instructionList, compiledInst);
+	instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
+	return instructionList;
+}
+InstList* activationFunctionRecord(Cmd* cmd)
+{
+	InstList* instructionList = EMPTY_LIST;
+	Inst* compiledInst;
+	InstSymbol* symbol = getNextSymbol(STACK_POINTER);
+	InstSymbol* symbol2 = getNextSymbol(FRAME_POINTER);
+	currentScope = cmd->attr.func.scope;
+	
+	compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
+	instructionList = appendInst(instructionList, compiledInst);
+	//STACK ALLOCATION
+	//addi $sp $sp -4
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-4));
+	instructionList = appendInst(instructionList, compiledInst);
+	//sw $fp 0($sp)
+	compiledInst = makeInstruction(STORE_VARIABLE, symbol2, symbol, makeInstSymbolInt(0));
+	instructionList = appendInst(instructionList, compiledInst);
+	//addi $fp $sp 4 
+	compiledInst = makeInstruction(ADD, symbol2, symbol, makeInstSymbolInt(4));
+	instructionList = appendInst(instructionList, compiledInst);
+	//addi $sp $sp -(scope_size - 4)
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
+	instructionList = appendInst(instructionList, compiledInst);
+	//sw $ra -8($fp)
+	compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
+	instructionList = appendInst(instructionList, compiledInst);
+	return instructionList;
+}
 
-} 
+InstList* storeCompiledExpression(Pair* expr, char* varName)
+{
+	Inst* compiledInst = NULL;
+	InstList* instructionList = expr->instructionList;
+	Variable* variable = getVariableScope(currentScope, varName);
+	if(variable == NULL)
+	{
+		printf("%s variable not found in the current scope\n", varName);
+		exit(-1);
+	}
+	if(variable->location == registerr) 
+	{
+		compiledInst = makeInstruction(ADD, getNextSymbol(variable->position.registerNumber), getNextSymbol(0), expr->symbol);
+	}
+	else
+	{
+		compiledInst = makeInstruction(STORE_VARIABLE, expr->symbol, getNextSymbol(FRAME_POINTER), makeInstSymbolInt(variable->position.stackOffset));
+	}
+	instructionList = appendInst(instructionList, compiledInst);
+	return instructionList;
+}
 
 InstList* compileCommand(Cmd* cmd) 
 {
@@ -233,18 +312,14 @@ InstList* compileCommand(Cmd* cmd)
 	InstSymbol* symbol2;
 	Inst* compiledInst;
 	InstSymbol* exitif;
+	Variable* variable;
 	char op[2];
 	switch(cmd->kind) 
 	{
 		case C_DECLARATION:
 			compiledExpr = makePairExpr(cmd->attr.declaration.expr);
-			instructionList = compiledExpr->instructionList;
-			symbol = getNextSymbol(getFreeRegister());
-			compiledInst = makeInstruction(LOAD_ADDRESS, symbol, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), NULL);
-			instructionList = appendInst(instructionList, compiledInst);
-			compiledInst = makeInstruction(STORE_VARIABLE, compiledExpr->symbol, symbol, makeInstSymbolInt(0));
-			instructionList = appendInst(instructionList, compiledInst);
-			freeRegister(symbol);
+			instructionList = storeCompiledExpression(compiledExpr, cmd->attr.declaration.variable->attr.variable);
+
 			if(compiledExpr->symbol->type == S_STR)
 				freeRegister(compiledExpr->symbol);
 			break;
@@ -263,10 +338,8 @@ InstList* compileCommand(Cmd* cmd)
 			op[0] = cmd->attr.increment.operator[0];
 			op[1] = 0;
 			compiledExpr = CompileExpression(op, var, compiledExpr);
-			instructionList = compiledExpr->instructionList;
-			instructionList = appendInst(instructionList, 
-				makeInstruction(STORE_VARIABLE, makeInstSymbolStr(cmd->attr.declaration.variable->attr.variable), 
-				compiledExpr->symbol, NULL));
+			instructionList = storeCompiledExpression(compiledExpr, cmd->attr.increment.variable->attr.variable);
+
 			if(compiledExpr->symbol->type == S_STR)
 				freeRegister(compiledExpr->symbol);		
 			//appendInst(makeInstruction(ADD,))
@@ -316,42 +389,12 @@ InstList* compileCommand(Cmd* cmd)
 		break;
 			
 		case C_FUNC: //TODO arguments
-			symbol = getNextSymbol(STACK_POINTER);
-			symbol2 = getNextSymbol(FRAME_POINTER);
-			compiledInst = makeInstruction(LABEL, makeInstSymbolStr(cmd->attr.func.funcName), NULL, NULL);
-			instructionList = appendInst(instructionList, compiledInst);
-			//STACK ALLOCATION
-			//addi $sp $sp -4
-			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-4));
-			instructionList = appendInst(instructionList, compiledInst);
-			//sw $fp 0($sp)
-			compiledInst = makeInstruction(STORE_VARIABLE, symbol2, symbol, makeInstSymbolInt(0));
-			instructionList = appendInst(instructionList, compiledInst);
-			//addi $fp $sp 4 
-			compiledInst = makeInstruction(ADD, symbol2, symbol, makeInstSymbolInt(4));
-			instructionList = appendInst(instructionList, compiledInst);
-			//addi $sp $sp -(scope_size - 4)
-			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
-			instructionList = appendInst(instructionList, compiledInst);
-			//sw $ra -8($fp)
-			compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
-			instructionList = appendInst(instructionList, compiledInst);
-
+			instructionList = activationFunctionRecord(cmd);
 			//Normal function operation
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.func.commandList));
-
-			//addi $sp $sp total_size
-			compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->scope_size));
-			instructionList = appendInst(instructionList, compiledInst);
-			//lw $ra -8($fp)
-			compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
-			instructionList = appendInst(instructionList, compiledInst);
-			//lw $fp -8($fp)
-			compiledInst = makeInstruction(LOAD_VARIABLE, symbol2, symbol2, makeInstSymbolInt(-4));
-			instructionList = appendInst(instructionList, compiledInst);
-
-			instructionList = appendInst(instructionList, makeInstruction(RETURN, NULL, NULL, NULL));
+			instructionList = concatInst(instructionList, returnFunction(cmd));
 			//TODO jal?
+			currentScope = NULL;
 		break;
 		case C_FUNC_CALL:
 			//TODO save used registers
@@ -379,7 +422,8 @@ InstList* compileCommand(Cmd* cmd)
 						compiledInst = makeInstruction(LOAD_ARGUMENT_STACK, compiledExpr->symbol, NULL, NULL);
 					}
 					instructionList = appendInst(compiledExpr->instructionList, compiledInst);
-					freeRegister(compiledExpr->symbol);
+					if(compiledExpr->symbol->type == S_STR)
+						freeRegister(compiledExpr->symbol);
 					exprlist = exprlist->Next;
 				}
 			}
