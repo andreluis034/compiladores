@@ -216,6 +216,8 @@ void compileSingleInstruction(Inst* instruction)
 void compileToMips(InstList* instructionList, CmdList* cmdlist) 
 {
     //globalVariables = NULL;
+    printf(".data\n");
+    printf("    newline: .asciiz \"\\n\"");
     printf("\n.text\n");
     //for now print and scan one arg
     //main starts here
@@ -235,6 +237,9 @@ void compileToMips(InstList* instructionList, CmdList* cmdlist)
     printf("    jr $ra\n");
     printf("\nfmt.print:\n");
     printf("    li $v0 1\n");
+    printf("    syscall\n");
+    printf("    li $v0 4\n");
+    printf("    la $a0 newline\n");
     printf("    syscall\n");
     printf("    jr $ra\n\n");
     
