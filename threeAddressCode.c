@@ -239,7 +239,7 @@ InstList* returnFunction(Cmd* cmd)
 	InstSymbol* symbol = getNextSymbol(STACK_POINTER);
 	InstSymbol* symbol2 = getNextSymbol(FRAME_POINTER);
 	//addi $sp $sp total_size
-	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->scope_size));
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->scope_size - 4));
 	instructionList = appendInst(instructionList, compiledInst);
 	//lw $ra -8($fp)
 	compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
@@ -271,7 +271,7 @@ InstList* activationFunctionRecord(Cmd* cmd)
 	compiledInst = makeInstruction(ADD, symbol2, symbol, makeInstSymbolInt(4));
 	instructionList = appendInst(instructionList, compiledInst);
 	//addi $sp $sp -(scope_size - 4)
-	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 4));
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(-cmd->attr.func.scope->scope_size + 8));
 	instructionList = appendInst(instructionList, compiledInst);
 	//sw $ra -8($fp)
 	compiledInst = makeInstruction(STORE_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
@@ -331,7 +331,6 @@ InstList* restoreRegisters()
 		{
 			if((i >= 4 && i <= 7 && currentScope->argument_registers + ARG_REGISTER_START - 1 >= i) || i > 7 )
 			{
-				printf("#restore");
 				instructionList = appendInst(instructionList, makeInstruction(POP, getNextSymbol(registers[i].registerNumber), NULL, NULL));
 			} 
 		}

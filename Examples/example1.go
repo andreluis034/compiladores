@@ -4,11 +4,7 @@ import "fmt"
 func main() {
 	c := 20;
 
-	//
-	fib(20);
-	if(c>0) {
-		fib(0);
-	}
+	fib(5);
 
 }
 func fib(a) {

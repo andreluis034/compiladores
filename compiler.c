@@ -15,9 +15,9 @@ int main(int argc, char** argv) {
     initializeRegisters();
     if (yyparse() == 0) {
       
-      //compileToMips(compileCmdList(root),root);
+      compileToMips(compileCmdList(root),root);
       //compileCmdList(root);
-      printCmdList(root,0,1);
+      //printCmdList(root,0,1);
       // printf("Result = %d\n", eval(root));
     }
     return 0;
