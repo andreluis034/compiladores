@@ -431,6 +431,7 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList, compiledInst);
 			
 		break;
+		
 	}
 	return instructionList;
 }

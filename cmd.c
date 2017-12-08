@@ -67,6 +67,17 @@ Cmd* makeFuncCall(char* funcName, ExprList* variables)
     node->attr.funcCall.variables = variables;
     return node;
 }
+
+Cmd* makeFunctionReturn(Expr* variable, char* operator, Cmd* funcCall)
+{
+    Cmd* node = (Cmd*) malloc(sizeof(Cmd));
+    node->kind = C_FUNC_RETURN;
+    node->attr.funcReturn.variable = variable;
+    node->attr.funcReturn.operator = operator;
+    node->attr.funcReturn.funcCall = funcCall;
+    return node;
+}
+
 Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) 
 {
     int regNumber = 0;
@@ -173,6 +184,15 @@ void printFunc(Cmd* cmd, int level, int lastChild)
     printCmdList(cmd->attr.func.commandList, level + 1, 1);
 }
 
+void printFuncReturn(Cmd* cmd, int level, int lastChild)
+{
+    printPadding(level, lastChild);
+    printf("C_FUNC_RETURN\n");
+    printExpr(cmd->attr.funcReturn.variable, level+1, 0);
+    printKeyValue("OPERATOR", cmd->attr.funcReturn.operator, level + 1, 0);
+    printFuncCall(cmd->attr.funcReturn.funcCall,level + 1,1);
+}
+
 void printCmd(Cmd* cmd, int level, int lastChild)  
 {
     switch(cmd->kind)
@@ -182,6 +202,7 @@ void printCmd(Cmd* cmd, int level, int lastChild)
         sCase(C_IF_ELSE, printIfElse);
         sCase(C_FOR, printFor);
         sCase(C_FUNC_CALL, printFuncCall);
+        sCase(C_FUNC_RETURN, printFuncReturn);
         sCase(C_FUNC, printFunc);
     }
 }
