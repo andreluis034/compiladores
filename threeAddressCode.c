@@ -12,6 +12,7 @@
 unsigned int tCount = 0;
 unsigned int labelCount = 0;
 Register registers[REGISTER_COUNT] =  {0};
+Register registers_backup[REGISTER_COUNT] =  {0};
 char* registerNames[] = {"$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3","$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7", "$t8", "$t9","$k0", "$k1", "$gp", "$sp", "$fp", "$ra"};
 Scope* currentScope;
 makeTypeList(InstList*, makeInstList, Inst*)
@@ -300,7 +301,41 @@ InstList* storeCompiledExpression(Pair* expr, char* varName)
 	instructionList = appendInst(instructionList, compiledInst);
 	return instructionList;
 }
+InstList* saveUsedRegisters()
+{
+	InstList* instructionList = EMPTY_LIST;
+	int i;
+	memcpy(registers_backup, registers, sizeof(registers));
+	for(i = 1; i < REGISTER_COUNT; ++i)
+	{
+		if(registers[i].used == 1)
+		{
+			instructionList = appendInst(instructionList, makeInstruction(PUSH, getNextSymbol(registers[i].registerNumber), NULL, NULL));
+		}
+		registers[i].used = (i <= 7 || i >= 24) ? 1 : 0;
+		registers[i].variableRepresented = NULL;
+	}
+	return instructionList;
+}
 
+InstList* restoreRegisters()
+{
+	InstList* instructionList = EMPTY_LIST;
+	int i;
+	memcpy(registers, registers_backup, sizeof(registers));
+	for(i = (REGISTER_COUNT - 1); i >= 1; --i)
+	{
+		if(registers[i].used == 1)
+		{
+			instructionList = appendInst(instructionList, makeInstruction(POP, getNextSymbol(registers[i].registerNumber), NULL, NULL));
+		}
+		else 
+		{
+			registers[i].variableRepresented = NULL;
+		}
+	}
+	return instructionList;
+}
 InstList* compileCommand(Cmd* cmd) 
 {
 	ExprList* exprlist;
@@ -308,6 +343,7 @@ InstList* compileCommand(Cmd* cmd)
 	Pair* compiledExpr;
 	Pair* var;
 	int regCount = 0;
+	int argsPushedToStack = 0;
 	InstSymbol* symbol;
 	InstSymbol* symbol2;
 	Inst* compiledInst;
@@ -398,9 +434,10 @@ InstList* compileCommand(Cmd* cmd)
 		break;
 		case C_FUNC_CALL:
 			//TODO save used registers
-			symbol = getNextSymbol(getFreeRegister());
+			instructionList = saveUsedRegisters();
 			if(strcmp(cmd->attr.funcCall.funcName, "fmt.scan") == 0) 
 			{
+				symbol = getNextSymbol(getFreeRegister());
 				compiledInst = makeInstruction(LOAD_ADDRESS, symbol, makeInstSymbolStr(getExpr(cmd->attr.funcCall.variables)->attr.variable), NULL);
 				instructionList = appendInst(instructionList, compiledInst);
 				compiledInst = makeInstruction(LOAD_ARGUMENT_REGISTER, makeInstSymbolStr("$a0"), symbol, NULL);
@@ -419,6 +456,7 @@ InstList* compileCommand(Cmd* cmd)
 					}
 					else
 					{
+						argsPushedToStack++;
 						compiledInst = makeInstruction(LOAD_ARGUMENT_STACK, compiledExpr->symbol, NULL, NULL);
 					}
 					instructionList = appendInst(compiledExpr->instructionList, compiledInst);
@@ -429,7 +467,11 @@ InstList* compileCommand(Cmd* cmd)
 			}
 			compiledInst = makeInstruction(FUNC_CALL, makeInstSymbolStr(cmd->attr.funcCall.funcName), NULL, NULL );
 			instructionList = appendInst(instructionList, compiledInst);
-			
+			if(argsPushedToStack > 0 ){
+				compiledInst = makeInstruction(ADD, getNextSymbol(STACK_POINTER), getNextSymbol(STACK_POINTER), makeInstSymbolInt(argsPushedToStack * 4) );
+				instructionList = appendInst(instructionList, compiledInst);
+			}
+			instructionList = concatList(instructionList, restoreRegisters());
 		break;
 		
 	}

@@ -30,7 +30,9 @@ typedef enum
 	LOAD_ADDRESS,
 	LOAD_ARGUMENT_STACK,
 	LOAD_ARGUMENT_REGISTER,
-	FUNC_CALL
+	FUNC_CALL,
+	PUSH,
+	POP
 } InstType;
 
 typedef struct 
