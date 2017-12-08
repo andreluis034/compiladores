@@ -111,10 +111,10 @@ Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist)
         }
         arglist = arglist->Next;
     }
-    VariableList* varlist = checkCmdList(cmdlist);
+    VariableList* varlist = checkCmdList(prependCmd(EMPTY_LIST, node));
     stackCount = 1;
     while(varlist != NULL)
-    {
+    {   
         addLocalVariable(node->attr.func.scope, getVariable(varlist));
         varlist = varlist->Next;
         stackCount++;

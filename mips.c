@@ -216,8 +216,6 @@ void compileSingleInstruction(Inst* instruction)
 void compileToMips(InstList* instructionList, CmdList* cmdlist) 
 {
     //globalVariables = NULL;
-    VariableList* varlist = checkCmdList(cmdlist);
-    printVariableList(varlist);
     printf("\n.text\n");
     //for now print and scan one arg
     //main starts here
@@ -234,7 +232,6 @@ void compileToMips(InstList* instructionList, CmdList* cmdlist)
     printf("\nfmt.scan:\n");
     printf("    li $v0 5\n");
     printf("    syscall\n");
-    printf("    sw $v0 0($a0)\n");
     printf("    jr $ra\n");
     printf("\nfmt.print:\n");
     printf("    li $v0 1\n");

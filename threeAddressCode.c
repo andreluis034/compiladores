@@ -9,6 +9,8 @@
 #define STACK_POINTER 29
 #define FRAME_POINTER 30
 #define RETURN_ADDRESS 31
+#define RETURN_REGISTER 2
+#define GENERIC_REGISTER 8
 unsigned int tCount = 0;
 unsigned int labelCount = 0;
 Register registers[REGISTER_COUNT] =  {0};
@@ -52,7 +54,7 @@ int getFreeRegister()
 {
 	int i;
 	int ret = -1;
-	for(i = 0; i < REGISTER_COUNT; ++i)
+	for(i = GENERIC_REGISTER; i < REGISTER_COUNT; ++i)
 	{
 		if(registers[i].used == 0)
 		{
@@ -74,7 +76,7 @@ int getFreeRegisterForVariable(char* varName, int* reused) {
 	int i;
 	int ret = -1;
 	*reused = 0;
-	for(i = 0; i < REGISTER_COUNT; ++i)
+	for(i = GENERIC_REGISTER; i < REGISTER_COUNT; ++i)
 	{
 		
 		if(registers[i].variableRepresented != NULL && strcmp(varName, registers[i].variableRepresented) == 0)
@@ -232,14 +234,14 @@ Pair* loadVariable(char* varName)
 	return makePair(is, lw);
 }
 
-InstList* returnFunction(Cmd* cmd)
+InstList* returnFunction()
 {
 	InstList* instructionList = EMPTY_LIST;
 	Inst* compiledInst;
 	InstSymbol* symbol = getNextSymbol(STACK_POINTER);
 	InstSymbol* symbol2 = getNextSymbol(FRAME_POINTER);
 	//addi $sp $sp total_size
-	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(cmd->attr.func.scope->scope_size - 4));
+	compiledInst = makeInstruction(ADD, symbol, symbol, makeInstSymbolInt(currentScope->scope_size - 4));
 	instructionList = appendInst(instructionList, compiledInst);
 	//lw $ra -8($fp)
 	compiledInst = makeInstruction(LOAD_VARIABLE, getNextSymbol(RETURN_ADDRESS), symbol2, makeInstSymbolInt(-8));
@@ -291,7 +293,7 @@ InstList* storeCompiledExpression(Pair* expr, char* varName) //TODO update regis
 	}
 	if(variable->location == registerr) 
 	{
-		compiledInst = makeInstruction(ADD, getNextSymbol(variable->position.registerNumber), getNextSymbol(0), expr->symbol);
+		compiledInst = makeInstruction(ADD, getNextSymbol(variable->position.registerNumber + ARG_REGISTER_START), getNextSymbol(0), expr->symbol);
 	}
 	else
 	{
@@ -352,6 +354,7 @@ InstList* compileCommand(Cmd* cmd)
 	InstSymbol* symbol;
 	InstSymbol* symbol2;
 	Inst* compiledInst;
+	InstList* lastInsts = NULL;
 	InstSymbol* exitif;
 	Variable* variable;
 	char op[2];
@@ -408,7 +411,7 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = appendInst(instructionList,makeInstruction(GOTO,symbol,NULL,NULL));
 			//LABEL1
 			instructionList = appendInst(instructionList,makeInstruction(LABEL,exitif,NULL,NULL));
-		break;
+			break;
 			
 		case C_IF_ELSE: 
 			//Compile expression
@@ -427,27 +430,22 @@ InstList* compileCommand(Cmd* cmd)
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.ifelse.iffalse));
 			//FINISH
 			instructionList = appendInst(instructionList, makeInstruction(LABEL, exitif, NULL, NULL));
-		break;
+			break;
 			
-		case C_FUNC: //TODO arguments
+		case C_FUNC:
 			instructionList = activationFunctionRecord(cmd);
 			//Normal function operation
 			instructionList = concatInst(instructionList, compileCmdList(cmd->attr.func.commandList));
-			instructionList = concatInst(instructionList, returnFunction(cmd));
-			//TODO jal?
+			instructionList = concatInst(instructionList, returnFunction());
 			currentScope = NULL;
-		break;
+			break;
 		case C_FUNC_CALL:
 			//TODO save used registers
 			instructionList = saveUsedRegisters();
 			if(strcmp(cmd->attr.funcCall.funcName, "fmt.scan") == 0) 
 			{
-				symbol = getNextSymbol(getFreeRegister());
-				compiledInst = makeInstruction(LOAD_ADDRESS, symbol, makeInstSymbolStr(getExpr(cmd->attr.funcCall.variables)->attr.variable), NULL);
-				instructionList = appendInst(instructionList, compiledInst);
-				compiledInst = makeInstruction(LOAD_ARGUMENT_REGISTER, makeInstSymbolStr("$a0"), symbol, NULL);
-				instructionList = appendInst(instructionList, compiledInst);
-				freeRegister(symbol);
+				lastInsts = storeCompiledExpression(makePairStr(registers[RETURN_REGISTER].registerName, EMPTY_LIST), 
+						getExpr(cmd->attr.funcCall.variables)->attr.variable);
 			}
 			else 
 			{
@@ -455,6 +453,8 @@ InstList* compileCommand(Cmd* cmd)
 				
 				while(exprlist != NULL) {
 					compiledExpr = makePairExpr(getExpr(exprlist));
+					if(compiledExpr->symbol->symbol.str[1] == 'a')
+						printf("WTF?\n");
 					if(regCount < ARG_REGISTER_COUNT)
 					{
 						compiledInst = makeInstruction(LOAD_ARGUMENT_REGISTER, getNextSymbol(regCount + ARG_REGISTER_START), compiledExpr->symbol, NULL);
@@ -474,16 +474,34 @@ InstList* compileCommand(Cmd* cmd)
 			}
 			compiledInst = makeInstruction(FUNC_CALL, makeInstSymbolStr(cmd->attr.funcCall.funcName), NULL, NULL );
 			instructionList = appendInst(instructionList, compiledInst);
+			if(lastInsts != NULL)
+			{
+				instructionList = concatList(instructionList, lastInsts); 
+			}
 			if(argsPushedToStack > 0 ){
 				compiledInst = makeInstruction(ADD, getNextSymbol(STACK_POINTER), getNextSymbol(STACK_POINTER), makeInstSymbolInt(argsPushedToStack * 4) );
 				instructionList = appendInst(instructionList, compiledInst);
 			}
 			instructionList = concatList(instructionList, restoreRegisters());
-		break;
+			break;
+		case C_RETURN:
+			if(cmd->attr._return.value != NULL)
+			{
+				compiledExpr = makePairExpr(cmd->attr._return.value);
+				instructionList = compiledExpr->instructionList;
+				compiledInst = makeInstruction(ADD, getNextSymbol(RETURN_REGISTER), getNextSymbol(0), compiledExpr->symbol);
+				instructionList = appendInst(instructionList, compiledInst);
+				if(compiledExpr->symbol->type == S_STR)
+					freeRegister(compiledExpr->symbol);
+			}
+			instructionList = concatInst(instructionList, returnFunction());
+			break;
 		case C_FUNC_RETURN:
 			instructionList = compileCommand(cmd->attr.funcReturn.funcCall);
-			instructionList = concatInst(instructionList, storeCompiledExpression(makePairStr("$v0",NULL),cmd->attr.funcReturn.variable->attr.variable));
-		break;
+			instructionList = concatInst(instructionList, 
+				storeCompiledExpression(makePairStr(registers[RETURN_REGISTER].registerName, EMPTY_LIST), 
+					cmd->attr.funcReturn.variable->attr.variable));
+			break;
 		
 	}
 	return instructionList;
@@ -502,16 +520,16 @@ Pair* makePairExpr(Expr* expr)
     {
         case E_BOOL:
         case E_INTEGER:
-        return makePairInt(expr->attr.value, NULL);
+        	return makePairInt(expr->attr.value, NULL);
         case E_VARIABLE: 
-        return loadVariable(expr->attr.variable);// makePairStr(expr->attr.variable, NULL);
+        	return loadVariable(expr->attr.variable);// makePairStr(expr->attr.variable, NULL);
         case E_OPERATION: 
-        p1 = makePairExpr(expr->attr.op.left);
-        p2 = makePairExpr(expr->attr.op.right);
-        return CompileExpression(expr->attr.op.operator, p1, p2);
+			p1 = makePairExpr(expr->attr.op.left);
+			p2 = makePairExpr(expr->attr.op.right);
+			return CompileExpression(expr->attr.op.operator, p1, p2);
         default:
-        printf("YOU FORGOT SOMETHING IDIOT type: %d\n", expr->kind); //TODO REMOVE
-        return NULL;
+			printf("YOU FORGOT SOMETHING IDIOT type: %d\n", expr->kind); //TODO REMOVE
+			return NULL;
     }   
     return NULL;
 }

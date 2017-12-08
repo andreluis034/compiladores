@@ -2,15 +2,15 @@ package main
 
 import "fmt"
 
-func dobra(x){
-    x:=x*2;
-    return x;
+func dobra(c){
+    c:=c*2;
+    return c;
 }
 
 
 func main() {
 
-    x:=0;
+    x:=20;
 
     fmt.Scan(x);
 

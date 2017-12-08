@@ -1,0 +1,54 @@
+
+.text
+    jal main
+    li $v0, 10
+    syscall
+dobra:
+    addi $sp $sp -4
+    sw $fp 0($sp)
+    addi $fp $sp 4
+    addi $sp $sp 0
+    sw $ra -8($fp)
+    mul $t0 $a0 2
+    add $a0 $zero $t0
+    add $v0 $zero $a0
+    addi $sp $sp 4
+    lw $ra -8($fp)
+    lw $fp -4($fp)
+    jr $ra
+    addi $sp $sp 4
+    lw $ra -8($fp)
+    lw $fp -4($fp)
+    jr $ra
+main:
+    addi $sp $sp -4
+    sw $fp 0($sp)
+    addi $fp $sp 4
+    addi $sp $sp -8
+    sw $ra -8($fp)
+    li $v1 20
+    sw $v1 -12($fp)
+    jal fmt.scan
+    sw $v0 -12($fp)
+    lw $t0 -12($fp)
+    add $a0 $zero $t0
+    jal dobra
+    sw $v0 -12($fp)
+    lw $t0 -12($fp)
+    add $a0 $zero $t0
+    jal fmt.print
+    addi $sp $sp 12
+    lw $ra -8($fp)
+    lw $fp -4($fp)
+    jr $ra
+
+fmt.scan:
+    li $v0 5
+    syscall
+    jr $ra
+
+fmt.print:
+    li $v0 1
+    syscall
+    jr $ra
+

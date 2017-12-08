@@ -17,6 +17,8 @@ Scope* createScope()
 
 void addArgument(Scope* s, char* varName, VariableLocation varLocation, int registerNumber)
 {
+    if(getVariableScope(s, varName) != NULL)
+        return;
     Variable* v = malloc(sizeof(Variable));
     v->varName = varName;
     v->location = varLocation;
@@ -35,11 +37,13 @@ void addArgument(Scope* s, char* varName, VariableLocation varLocation, int regi
 
 void addLocalVariable(Scope* s, char* varName)
 {
-    s->scope_size += 4;
+    if(getVariableScope(s, varName) != NULL)
+        return;
     Variable* v = malloc(sizeof(Variable));
     v->varName = varName;
     v->location = stack;
     v->position.stackOffset = -s->scope_size;
+    s->scope_size += 4;
 
     addKeyValue(s->hashmap, varName, v);
 }
