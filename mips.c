@@ -167,8 +167,6 @@ void compileSingleInstruction(Inst* instruction)
             else
                 printf("    add $v0 $zero %s\n", SYMBOL_STR(1));
         }
-        //
-        
         printf("    jr $ra\n");
         break;
         case BRANCH_EQ_ZERO:
@@ -198,6 +196,15 @@ void compileSingleInstruction(Inst* instruction)
             {
                 printf("    add %s $zero %s\n", SYMBOL_STR(1), SYMBOL_STR(2));
             }
+        break;
+        case PUSH:
+        case LOAD_ARGUMENT_STACK:
+        printf("    addi $sp $sp -4\n");
+        printf("    sw %s 0($sp)\n", SYMBOL_STR(1));
+            break;
+        case POP:
+        printf("    lw %s 0($sp)\n", SYMBOL_STR(1));
+                printf("    addi $sp $sp 4\n");
         break;
         case FUNC_CALL:
             printf("    jal %s\n", SYMBOL_STR(1));

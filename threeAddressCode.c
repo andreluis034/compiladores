@@ -101,7 +101,7 @@ int getFreeRegisterForVariable(char* varName, int* reused) {
 void freeRegister(InstSymbol* symb) 
 {
 	int i;
-	if(symb->symbol.str[1] == 'z')
+	if(symb->symbol.str[1] == 'z' || symb->symbol.str[1] == 'a' || symb->symbol.str[1] == 'v')
 	{
 		return;
 	}
@@ -180,7 +180,6 @@ Pair* CompileExpression(char* operator, Pair* left, Pair* right)
 	if(right->symbol->type == S_STR)
 	freeRegister(right->symbol);
 	InstSymbol* nextSymbol = getNextSymbol(getFreeRegister());//TODO: use one of the expressions
-	printf("#%s\n",nextSymbol->symbol.str);
 	InstList* requiredInstructions = concatInst(left->instructionList, right->instructionList); 
 	COMPILE_OPERATOR(if, "*", MUL)
 	COMPILE_OPERATOR(else if, "/", DIV)
@@ -308,11 +307,14 @@ InstList* saveUsedRegisters()
 	memcpy(registers_backup, registers, sizeof(registers));
 	for(i = 1; i < REGISTER_COUNT; ++i)
 	{
-		if(registers[i].used == 1)
+		if(registers[i].used == 1 && !(i <= 3 || i >= 24))
 		{
-			instructionList = appendInst(instructionList, makeInstruction(PUSH, getNextSymbol(registers[i].registerNumber), NULL, NULL));
+			if((i >= 4 && i <= 7 && currentScope->argument_registers + ARG_REGISTER_START - 1 >= i) || i > 7 )
+			{
+				instructionList = appendInst(instructionList, makeInstruction(PUSH, getNextSymbol(registers[i].registerNumber), NULL, NULL));
+			} 
 		}
-		registers[i].used = (i <= 7 || i >= 24) ? 1 : 0;
+		registers[i].used = (i <= 3 || i >= 24) ? 1 : 0;
 		registers[i].variableRepresented = NULL;
 	}
 	return instructionList;
@@ -325,11 +327,15 @@ InstList* restoreRegisters()
 	memcpy(registers, registers_backup, sizeof(registers));
 	for(i = (REGISTER_COUNT - 1); i >= 1; --i)
 	{
-		if(registers[i].used == 1)
+		if(registers[i].used == 1 && !(i <= 3 || i >= 24))
 		{
-			instructionList = appendInst(instructionList, makeInstruction(POP, getNextSymbol(registers[i].registerNumber), NULL, NULL));
+			if((i >= 4 && i <= 7 && currentScope->argument_registers + ARG_REGISTER_START - 1 >= i) || i > 7 )
+			{
+				printf("#restore");
+				instructionList = appendInst(instructionList, makeInstruction(POP, getNextSymbol(registers[i].registerNumber), NULL, NULL));
+			} 
 		}
-		else 
+		else if(!(i <= 3 || i >= 24))
 		{
 			registers[i].variableRepresented = NULL;
 		}
@@ -447,6 +453,7 @@ InstList* compileCommand(Cmd* cmd)
 			else 
 			{
 				exprlist = cmd->attr.funcCall.variables;
+				
 				while(exprlist != NULL) {
 					compiledExpr = makePairExpr(getExpr(exprlist));
 					if(regCount < ARG_REGISTER_COUNT)
@@ -459,7 +466,8 @@ InstList* compileCommand(Cmd* cmd)
 						argsPushedToStack++;
 						compiledInst = makeInstruction(LOAD_ARGUMENT_STACK, compiledExpr->symbol, NULL, NULL);
 					}
-					instructionList = appendInst(compiledExpr->instructionList, compiledInst);
+					instructionList = concatList(instructionList, compiledExpr->instructionList);
+					instructionList = appendInst(instructionList, compiledInst);
 					if(compiledExpr->symbol->type == S_STR)
 						freeRegister(compiledExpr->symbol);
 					exprlist = exprlist->Next;

@@ -9,7 +9,7 @@ Scope* createScope()
     //4 bytes for the return address (-4)
     s->scope_size = 8;
     s->argument_size = 0;
-
+    s->argument_registers = 0;
     s->hashmap = create_hashmap();
     s->parent = NULL;
     return s;
@@ -28,6 +28,7 @@ void addArgument(Scope* s, char* varName, VariableLocation varLocation, int regi
     else
     {
         v->position.registerNumber = registerNumber;
+        s->argument_registers++;
     }
     addKeyValue(s->hashmap, varName, v);
 }

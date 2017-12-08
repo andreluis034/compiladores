@@ -6,6 +6,7 @@ struct _scope
     hashmap* hashmap;
     int scope_size;
     int argument_size;
+    int argument_registers;
     struct _scope* parent;
 };
 enum _variableLocation
