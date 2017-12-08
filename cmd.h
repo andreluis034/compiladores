@@ -13,6 +13,7 @@ struct _Cmd {
 		C_FOR,
 		C_FUNC_CALL,
 		C_FUNC,
+		C_FUNC_RETURN,
 		C_RETURN
 	} kind;
 	union {
@@ -42,6 +43,11 @@ struct _Cmd {
 			ExprList* variables;
 		} funcCall;
 		struct {
+			Expr* variable;
+			char* operator;
+			struct _Cmd* funcCall;
+		} funcReturn;
+		struct {
 			char* funcName;
 			ExprList* argList;
 			CmdList* commandList;
@@ -66,3 +72,4 @@ Cmd* makeIfElseCmd(Expr* expr, CmdList* iftrue, CmdList* iffalse );
 Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body );
 Cmd* makeFuncCall(char* funcName, ExprList* variables) ;
 Cmd* makeFunc(char* funcName, ExprList* arglist, CmdList* cmdlist) ;
+Cmd* makeFunctionReturn(Expr* variable, char* operator, Cmd* funcCall) ;

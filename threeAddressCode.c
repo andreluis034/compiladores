@@ -481,6 +481,7 @@ InstList* compileCommand(Cmd* cmd)
 			}
 			instructionList = concatList(instructionList, restoreRegisters());
 		break;
+		
 	}
 	return instructionList;
 }

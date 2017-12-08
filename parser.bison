@@ -136,6 +136,7 @@ n_arg_list: expr {$$ = makeExprList($1);}
 	        | expr COMMA_TOKEN n_arg_list {$$ = prependExpr($3, $1);}
 
 declaration: expr_var ASSIGN_TOKEN expr {$$ = makeDeclarationCmd($1, $2, $3);}
+           | expr_var ASSIGN_TOKEN func_call {$$ = makeFunctionReturn($1, $2, $3);}
 
 if: IF_TOKEN expr OPENBRA_TOKEN cmd_list CLOSEBRA_TOKEN if_else {$$ = makeIfElseCmd($2, $4, $6); }
 
