@@ -108,7 +108,7 @@ void printCompare(Inst* instruction, char* comparation){
     else{
         printf("    li $t9 %d\n",SYMBOL_INT(2));
         printf("    li $t8 %d\n",SYMBOL_INT(3));
-        printf("    %s %s $t8 $t9\n",comparation,SYMBOL_STR(1));
+        printf("    %s %s $t9 $t8\n",comparation,SYMBOL_STR(1));
     }
     
 }
