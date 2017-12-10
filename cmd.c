@@ -56,6 +56,7 @@ Cmd* makeFor(Cmd* initial, Expr* condition, Cmd* afterIteration, CmdList* body )
     node->attr.forCmd.initial = initial;
     node->attr.forCmd.condition = condition;
     node->attr.forCmd.afterIteration = afterIteration;
+    node->attr.forCmd.body = body;
     return node;
 }
 

@@ -3,8 +3,8 @@ import "fmt"
 
 func main() {
 
-	a := fib(3);
-	fmt.Print(a);
+	c:= fib(20);
+	fmt.Print(c);
 }
 func fib(a) {
 	if(a < 2) {

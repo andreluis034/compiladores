@@ -178,9 +178,9 @@ Inst* makeInstruction(InstType type, InstSymbol* s1, InstSymbol* s2, InstSymbol*
 Pair* CompileExpression(char* operator, Pair* left, Pair* right) 
 {
 	if(left->symbol->type == S_STR)
-	freeRegister(left->symbol);
+		freeRegister(left->symbol);
 	if(right->symbol->type == S_STR)
-	freeRegister(right->symbol);
+		freeRegister(right->symbol);
 	InstSymbol* nextSymbol = getNextSymbol(getFreeRegister());//TODO: use one of the expressions
 	InstList* requiredInstructions = concatInst(left->instructionList, right->instructionList); 
 	COMPILE_OPERATOR(if, "*", MUL)
