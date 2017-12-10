@@ -174,7 +174,7 @@ true|false {
         return SEPARATOR_TOKEN;
     }
 
-[0-9]+ {
+-?[0-9]+ {
     yylval.intValue = atoi(yytext);
     //printf("INT_TOKEN\n");
     sumChars;
@@ -187,7 +187,7 @@ true|false {
     sumChars;
     return VAR_TOKEN;
 }
-[\n\r] {
+\n\r|\r\n|\n|\r {
         resetChars;
         sumLines;
      }
