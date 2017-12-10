@@ -345,6 +345,8 @@ InstList* restoreRegisters()
 }
 InstList* compileCommand(Cmd* cmd) 
 {
+	if(cmd == NULL)
+		return EMPTY_LIST;
 	ExprList* exprlist;
 	InstList* instructionList = EMPTY_LIST;
 	Pair* compiledExpr;
