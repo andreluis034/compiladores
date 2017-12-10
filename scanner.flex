@@ -8,7 +8,7 @@
 #define resetChars yycharCount = 0
 #define sumLines linesCount ++
 
-int linesCount = 0;
+int linesCount = 1;
 int yycharCount = 0;
 %}
 
@@ -174,7 +174,7 @@ true|false {
         return SEPARATOR_TOKEN;
     }
 
--?[0-9]+ {
+[0-9]+ {
     yylval.intValue = atoi(yytext);
     //printf("INT_TOKEN\n");
     sumChars;
