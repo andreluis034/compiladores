@@ -1,18 +1,12 @@
+A rather simple compiler of a subset of Go language to MIPS.
 
- The AST Generator is an Abstract Syntatic Tree Generator for Go language programs.
 
-		[How to run the AST Generator]
-
-			- Navigate into the main folder /ast_generator
-			- Using the bash/shell/cmd, execute the command "make"
-			- All the files will be compiled and ready to be executed
-			- To run the generator, use the command "./compiler.o"
 
 		[Using the examples given and creating your own examples]
 
 			- 3 examples are given within the original package of the generator
-			- They are located under the folder /ast_generator/Examples
-			- To generate the AST for each of them using the bash/shell/cmd, while in the main folder "/ast_generator", you can execute the following commands:
+			- They are located under the folder /Examples
+			- To generate the MIPS code for each of them using the bash/shell/cmd, while in the root folder, you can execute the following commands:
 
 					"./compiler.o < Examples/example1.go"
 
