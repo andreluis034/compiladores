@@ -6,11 +6,10 @@ func main() {
 	c:= fib(20);
 	fmt.Print(c);
 }
-func fib(a) {
-	if(a < 2) {
-		return a;
+func fact(x) { 
+	if x == 0 {
+		return 1;
 	}
-	c := fib(a-1);
-	b := fib(a-2);
-	return c + b;
+	y := fact(x-1);
+	return x *y;
 }
